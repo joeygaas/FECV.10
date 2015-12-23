@@ -150,8 +150,10 @@ function($scope, $location, $ionicPlatform, $ionicModal, $cordovaBarcodeScanner,
     $scope.addCompany = function(companyObj){
 
         CompanySvc.create(companyObj.name, companyObj.person, companyObj.number).then(function(success){
+            // generate a valid company dir name
+            var companyName = companyObj.name.split(' ').join('');
             // generate company dir
-            FileSvc.createDirInExternal(companyObj.name);
+            FileSvc.createDirInExternal(companyName);
             // Update the list of companies
             $scope.getAll();
         });

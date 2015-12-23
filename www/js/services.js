@@ -395,11 +395,8 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             var deffered = $q.defer();
 
             try {
-                // generate a valid dir name
-                var name = dirName.split(' ').join('');
-
                 $ionicPlatform.ready(function(){
-                    $cordovaFile.createDir(cordova.file.externalDataDirectory, name, false)
+                    $cordovaFile.createDir(cordova.file.externalDataDirectory, dirName, false)
                     .then(function(success){
                         deffered.resolve(success);
                     }, function(error){
