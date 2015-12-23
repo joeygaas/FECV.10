@@ -1,0 +1,67 @@
+/* Modal box animation */
+a {
+    text-decoration: none;
+    color: black;
+  }
+
+/* Scale-In Animation */
+.scale-in {
+  transform: scale(0.9);
+  opacity: 0;
+}
+.scale-in.ng-enter,
+.scale-in > .ng-enter {
+  transition: all cubic-bezier(.1, .7, .1, 1) 800ms;
+}
+
+.scale-in.ng-enter-active,
+.scale-in > .ng-enter-active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.scale-in.ng-leave,
+.scale-in > .ng-leave {
+  transition: all ease-in-out 250ms;
+}
+
+/* paddings and margins */
+.no-padding {
+    padding: 0;
+    margin: 0;
+}
+
+.status-header {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.bordered {
+  outline: 1px solid black;
+  outline-color: #c2c2c2;
+}
+
+.align-center {
+  text-align: center;
+}
+
+/* Images Style */
+.img-sm {
+  width : 100px;
+  height: 100px;
+}
+
+/* element positioning */
+.elem-25 {
+  margin-top: 25%;
+}
+
+.elem-30 {
+  margin-top: 30%;
+}
+
+/* element padding */
+.padding-none {
+  padding: 0;
+  margin: 0;
+}

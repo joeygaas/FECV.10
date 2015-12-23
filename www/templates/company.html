@@ -1,0 +1,220 @@
+<ion-view view-title={{companyName}}>
+<ion-nav-buttons side="right">
+    <button class="button icon ion-qr-scanner" ng-click="scanUnit(companyName, companyId)"></button>
+    <a  class="button icon ion-android-search" ng-href="#/app/search"></a>
+    <button ng-click="openPopover($event)" class="button icon ion-android-more-vertical button-clear"></button>
+</ion-nav-buttons>
+  <ion-content scroll="true" has-bouncing="true" class="">
+     <!-- Status Reports page -->
+     <div>
+         <div class="list  card">
+           <div class="item item-divider">
+             <h2>Company Name : {{ companyName }}</h2>
+             <h2>Last Inspection : {{ summary.lastInspect}}</h2>
+           </div>
+
+           <a class="item" ng-href="#/app/locations/{{ companyId }}/{{ companyName }} ">
+             Total Units
+             <span class="badge badge-positive">{{ summary.totalUnits }}</span>
+           </a>
+           <a class="item" ng-click="displayGoodUnits()">
+             Passed
+             <span class="badge badge-positive">{{ summary.good }}</span>
+           </a>
+           <a class="item" ng-click="displayDeffectiveUnits()">
+             Failed
+             <span class="badge badge-assertive">{{ summary.deffective }}</span>
+           </a>
+           <a class="item" ng-click="displayNotInspected()">
+             Not Inspected
+             <span class="badge badge-assertive">{{ summary.notInspectedUnits }}</span>
+           </a>
+           <a class="item" ng-click="displayMissingUnits()">
+             Missing Units
+             <span class="badge badge-assertive">{{ summary.missingUnits }}</span>
+           </a>
+         </div>
+
+         <div class="list card">
+           <!-- Summary Report -->
+           <div class="item item-divider">
+             <h2>Company Inspection Summary Report</h2>
+           </div>
+           <a class="item item-icon-right item-text-wrap" ng-click="displayChecklist1Failed()">
+             Discharge Hose/nozzle is not in good shape.
+             <span class="badge badge-assertive">{{ summary.checklist1Total }}</span>
+           </a>
+
+           <a class="item item-icon-right item-text-wrap" ng-click="displayChecklist2Failed()">
+             Not mounted in an easily accessible area.
+             <span class="badge badge-assertive">{{ summary.checklist2Total }}</span>
+           </a>
+
+           <a class="item item-icon-right item-text-wrap" ng-click="displayChecklist3Failed()">
+             Safety Pin is not in place and damaged.
+             <span class="badge badge-assertive">{{ summary.checklist3Total }}</span>
+           </a>
+           
+           <a class="item item-icon-right item-text-wrap" ng-click="displayChecklist4Failed()">
+             Pressure gauge is not in the green or damaged or showing “recharge”
+             <span class="badge badge-assertive">{{ summary.checklist4Total }}</span>
+           </a>
+           
+
+           <a class="item item-icon-right item-text-wrap" ng-click="displayChecklist5Failed()">
+             Label is not readable, don't display the type of fire extinguisher and the instructions for use
+             <span class="badge badge-assertive">{{ summary.checklist5Total }}</span>
+           </a>
+           
+           <a class="item item-icon-right item-text-wrap" ng-click="displayChecklist6Failed()">
+             Rusty, or has any type of corrosion build up.
+             <span class="badge badge-assertive">{{ summary.checklist6Total }}</span>
+           </a>
+           
+           <a class="item item-icon-right item-text-wrap" ng-click="displayChecklist8Failed()">
+             The location of the extinguisher is not easily identifiable.  (signs)
+             <span class="badge badge-assertive">{{ summary.checklist8Total }}</span>
+           </a>
+
+           <div class="item item-divider">
+             &nbsp
+           </div>
+       </div>
+       </div>
+     </div>
+  </ion-content>
+  <div class="bar bar-footer bar-assertive">
+       <div class="button-bar">
+          <a ng-hide="started" class="button button-clear" ng-click="startInspection(companyId)">
+            Start Inspection
+          </a>
+          <a ng-show="started" class="button button-clear" ng-click="endInspection(companyId)">
+            End Inspection
+          </a>
+          <a class="button button-clear" ng-hide="printRecords" ng-href="#/app/locations/{{companyId}}/{{companyName}}">
+            View Records
+          </a>
+       </div>
+  </div>
+</ion-view>
+
+<!-- popopver -->
+<script id="details-popover.html" type="text/ng-template">
+<ion-popover-view>
+    <ion-content>
+        <div class="list">
+            <a class="item item-icon-left" ng-click="editCompany(companyId)">
+                <i class="icon ion-ios-compose-outline"></i>
+                Edit Details
+            </a>
+            <a class="item item-icon-left" ng-href="#/app/report" ng-click="hidePopover(); saveForReport(summary, companyName, companyName + '-SummaryReport')">
+                <i class="icon ion-document"></i>
+                Generate Report
+            </a>
+            <a class="item item-icon-left" ng-href="#/app/import/{{companyId}}" ng-click="hidePopover()">
+                <i class="icon ion-android-folder-open"></i>
+                Import Records
+            </a>
+            <a class="item item-icon-left" ng-click="">
+                <i class="icon ion-android-share-alt"></i>
+                Share Records
+            </a>
+            <a class="item item-icon-left" ng-click="deleteAllRecords(companyId)">
+                <i class="icon ion-android-delete"></i>
+                Delete All Records
+            </a>
+        </div>
+    </ion-content>
+</ion-popover-view>
+</script>
+
+<!-- modal box 1 -->
+<script id="edit-modal.html" type="text/ng-template">
+<ion-modal-view>
+    <ion-header-bar class="bar-assertive">
+        <h1 class="title" ng-hide="update || add">Edit Company</h1>
+        <h1 class="title" ng-show="add">Add new Unit</h1>
+        <h1 class="title" ng-show="update">Update Records</h1>
+        <button ng-click="hideModal(1)" class="button icon ion-close"></button>
+    </ion-header-bar>
+    <ion-content>
+        <!-- Update company form -->
+        <form ng-submit="updateCompany(company, companyId)" name="company_add">
+        <div class="list list-inset" ng-hide="update">
+            <label class="item item-input">
+                <input ng-model="company.name" type="text" placeholder="Company Name" required />
+            </label>
+            <label class="item item-input">
+                <input ng-model="company.person" type="text" placeholder="Contact Person" required/>
+            </label>
+            <label class="item item-input">
+                <input ng-model="company.contact_no" type="tel" placeholder="Contact No." required/>
+            </label>
+            
+            <div class="row">
+                <div class="col">
+                    <input ng-disabled="company_add.$invalid" ng-click="hideModal()" type="submit" value="Submit" class="button button-block button-positive" />
+                </div>
+                <div class="col">
+                    <input type="reset" class="button button-block button-assertive" value="Reset Field">
+                </div>
+            </div>
+        </div>
+        </form>
+
+        <!-- Update Unit form -->
+        <form ng-submit="updateUnit(unit)">
+        <div ng-show="update">
+         
+        </div>
+        </form>
+    </ion-content>
+</ion-modal-view>
+</script>
+
+<script id="summary-modal.html" type="text/ng-template">
+  <!-- header -->
+  <ion-modal-view>
+    <ion-header-bar class="bar-assertive">
+      <h1 class="title">{{ summaryTitle }}</h1>
+      <button ng-click="hideModal(2)" class="button icon ion-close"></button>
+    </ion-header-bar>
+
+    <!-- main content -->
+    <ion-content>
+      <div class="list card" ng-show="content">
+          <a class="item" ng-repeat="result in results" ng-href="#/app/unitRecords/{{result.serial_no}}/{{companyName}}/{{companyId}}" ng-click="hideModal(2)">
+            <h2>Model : {{ result.model }}</h2>
+            <p>Serial No : {{ result.serial_no }}</p>
+            <p>Location : {{ result.location }}</p>
+          </a>
+      </div>
+
+      <div class="list card" ng-hide="content">
+        <div class="item">Empty Records</div>
+      </div>
+    </ion-content>
+
+    <!-- footer -->
+    <div class="bar bar-footer bar-assertive" ng-show="content">
+      <div class="button-bar">
+        <a class="button button-clear" ng-href="#/app/report" ng-click="hideModal(2); saveForReport(results, companyName, summaryTitle)">Generate Report</a>
+      </div>
+    </div>
+  </ion-modal-view>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

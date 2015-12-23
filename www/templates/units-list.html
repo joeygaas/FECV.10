@@ -1,0 +1,47 @@
+<ion-view view-title={{title}}>  
+  <ion-nav-buttons side="right">
+    <button ng-click="openPopover($event)" class="button icon ion-android-more-vertical button-clear"></button>
+  </ion-nav-buttons>
+<ion-content>
+
+  <!-- locations units page -->
+  <div>
+     <a ng-repeat="unit in units" class="item item-icon-right" ng-href="#/app/unitRecords/{{unit.serial_no}}/{{companyName}}/{{companyId}}">
+        <h2>{{unit.model}}</h2>
+        <p>{{unit.serial_no}}</p>
+        <span ng-show="unit.status == 'operational'" class="icon ion-checkmark-circled balanced"></span>
+        <span ng-show="unit.status == 'deffective'" class="icon ion-android-warning energized"></span>
+      </a>
+  </div>
+</ion-content>
+</ion-view>
+
+<!-- Menu popover -->
+<script id="menu-popover.html" type="text/ng-template">
+  <ion-popover-view>
+    <ion-content>
+        <div class="list">
+          <a class="item item-icon-left" ng-click="scanUnit(companyName, companyId); closePopover()">
+              <i class=" icon ion-qr-scanner"></i>
+              Scan Unit
+          </a>
+          <a class="item item-icon-left" ng-href="#/app/search" ng-click="closePopover()">
+              <i class=" icon ion-android-search"></i>
+              Search
+          </a>
+          <a class="item item-icon-left" ng-click="closePopover(); takePicture(unit.serial_no)">
+              <i class=" icon ion-camera"></i>
+              Camera
+          </a>
+          <a class="item item-icon-left" ng-click="closePopover()">
+              <i class="icon ion-android-document"></i>
+              Genrate Report
+          </a>
+          <a class="item item-icon-left" ng-click="closePopover()">
+              <i class="icon ion-android-delete"></i>
+              Delete Records
+          </a>
+        </div>
+    </ion-content>
+  </ion-popover-view>
+</script>

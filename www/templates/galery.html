@@ -1,0 +1,86 @@
+<ion-view view-title="Galery">
+	<ion-nav-buttons side="right">
+    	
+	</ion-nav-buttons>
+  	<ion-content>
+    	<div class="list" ng-hide="noResults">
+    		<a ng-repeat="photo in unitImg" class="item item-thumbnail-left item-text-wrap" ng-click="viewPhoto(photo)">
+    			<img ng-src="{{ photo.imgURI }}">
+    			<h2>Date Taken : {{ photo.date_taken }}</h2>
+          <p>Remarks : {{ photo.description }}</p>
+    		</a>
+    	</div>
+
+      <!-- no results -->
+      <div ng-show="noResults" class="card">
+        <div class="item">
+          No Pictures
+        </div>
+      </div>
+  	</ion-content>
+</ion-view>
+
+<script id="photo-modal.html" type="text/ng-template">
+  <ion-modal-view>
+    <!-- header -->
+    <ion-header-bar class="bar-assertive">
+      <h1 class="title">Image</h1>
+      <button ng-click="hideModal(1)" class="button icon ion-close"></button>
+    </ion-header-bar>
+
+    <!-- main content -->
+    <ion-content>
+      <div class="list card">
+
+        <div class="item item-text-wrap">
+          <h2> Date Taken : {{ selectedImg.date_taken }}</h2>
+          <p>Remarks : {{ selectedImg.description }}</p>
+        </div>
+
+        <div class="item item-image">
+          <img ng-src="{{ selectedImg.imgURI }}">
+        </div>
+      </div>
+    </ion-content>
+
+    <!-- footer -->
+    <div class="bar bar-footer bar-assertive">
+      <div class="button-bar">
+        <button class="button button-clear" ng-click="editPhotoFrm(selectedImg)">Edit</button>
+        <button class="button button-clear" ng-click="removePhoto(selectedImg.id)">Delete</button>
+      </div>
+    </div>
+  </ion-modal-view>
+</script>
+
+<!-- edit form -->
+<script id="editPhoto-modal.html" type="text/ng-template">
+  <form name="editFrm">
+  <ion-modal-view>
+      <!-- header -->
+      <ion-header-bar class="bar-assertive">
+        <h1 class="title">Update Photo</h1>
+        <button ng-click="hideModal(2)" class="button icon ion-close"></button>
+      </ion-header-bar>
+
+      <!-- main content -->
+      <ion-content>
+        <div class="list">
+            <label class="item item-input item-floating-label">
+              <span class="input-label">Remarks</span>
+              <input type="text" placeholder="Remarks" ng-model="selectedImg.description">
+            </label>
+        </div>
+      </ion-content>
+
+      <!-- footer -->
+      <div class="bar bar-footer bar-assertive">
+          <div class="button-bar">
+              <button class="button button-clear" ng-click="editPhoto(selectedImg)" ng-disabled="edtForm.$invalid">
+                Update
+              </button>
+          </div>
+      </div>
+  </ion-modal-view>
+  </form>
+</script>

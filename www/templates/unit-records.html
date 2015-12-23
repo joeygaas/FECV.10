@@ -1,0 +1,427 @@
+<ion-view view-title="Unit Record">  
+
+<!-- Navigation button here -->
+<ion-nav-buttons side="right">
+   <button ng-click="openPopover($event)" class="button icon ion-android-more-vertical button-clear"></button>
+</ion-nav-buttons>
+
+<!-- Content -->
+<ion-content>
+    <!-- Unit Records Page -->
+     <div ng-hide="noResults">
+       <!-- Company Details -->
+       <div class="list card" ng-click="detailsForm()">
+         <div class="item item-divider">
+            <h2>Company : {{companyName}}</h2>
+            <h2>Unit Model : {{unit.model}}</h2>
+            <h2>Control No : {{unit.serial_no}}</h2>
+         </div>
+
+         <div class="item">
+            <p>Location : {{unit.location}}</p>
+            <p>Inspection Date : {{unit.inspection_date}}</p>
+            <p>Overal Status : <span ng-show="unit.status == 'operational'" class="positive">Operational</span>
+            <span ng-show="unit.status == 'deffective'" class="assertive">Deffective</span></p>
+            <br />
+            <p>Date Aquired : {{unit.dop}}</p>
+            <p>Date Refilled : {{unit.date_refilled}}</p>
+            <p>Expiration Date : {{unit.expiration_date}}</p>
+         </div>
+       </div>
+
+       <!-- Image Galery -->
+       <div class="list card">
+          <a class="item item-thumbnail-left item-text-wrap" ng-href="#/app/galery/{{unit.serial_no}}">
+            <img src="img/galery-icon.png">
+            <h2>Unit Image Galery</h2>
+            <p>Tap to view unit photos</p>
+          </a>
+       </div>
+
+       <!-- Status Report -->
+       <div class="list card" ng-click="inspectForm()">
+         <div class="item item-divider">
+           <h2>Status Report</h2>
+         </div>
+         <div class="row">
+           <div class="col bordered">Discharge hose nozzle is in good condition and not clogged, cracked, or broken.</div>
+           <div class="col bordered">
+             <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist1 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist1 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col bordered">It is mounted in an easily accessible area, with nothing stacked around it. </div>
+           <div class="col bordered">
+              <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist2 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist2 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col bordered">Safety Pin is in place and not damaged.</div>
+           <div class="col bordered">
+             <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist3 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist3 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col bordered">Pressure gauge is in the green and not damaged or showing “recharge”</div>
+           <div class="col bordered">
+             <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist4 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist4 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col bordered">Label is readable and displays the type of fire extinguisher and the instructions for use</div>
+           <div class="col bordered">
+             <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist5 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist5 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col bordered">It is not rusty, or has any type of corrosion build up.</div>
+           <div class="col bordered">
+             <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist6 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist6 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+         <div class="row">
+           <div class="col bordered">Extinguisher was turned upside down at least three times. (Shaken)</div>
+           <div class="col bordered">
+             <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist7 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist7 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+          <div class="row">
+           <div class="col bordered">The location of the extinguisher is easily identifiable. (Signs)</div>
+           <div class="col bordered">
+             <div class="col col-top">&nbsp</div>
+              <div class="col col-center align-center">
+                <span ng-show="unit.checklist8 == 'passed'" class="positive">Passed</span>
+                <span ng-show="unit.checklist8 == 'failed'"class="assertive">Failed</span>
+              </div>
+              <div class="col col-buttom">&nbsp</div>
+           </div>
+         </div>
+         <div class="item"></div>
+       </div>
+     </div>
+
+     <!-- No Results -->
+     <div ng-show="noResults">
+     	<div class="list card">
+     		<div class="item">No Results Found.</div>
+     	</div>
+     </div>
+</ion-content>
+	<div class="bar bar-footer bar-assertive">
+       <div class="button-bar">
+          <a class="button button-clear" ng-click="inspectForm()" ng-hide="noResults">
+            Inspect
+          </a>
+
+          <a class="button button-clear" ng-click="detailsForm()" ng-hide="noResults">
+            Details
+          </a>
+
+          <a class="button button-clear" ng-click="tagAsFound(unit.serial_no)" ng-show="missingBtn">
+            Found
+          </a>
+
+          <a class="button button-clear" ng-click="tagAsMissing(unit.serial_no)" ng-hide="missingBtn">
+            Missing
+          </a>
+       </div>
+  </div>
+</ion-view>
+
+<!-- Unit modal box -->
+<script id="add-modal.html" type="text/ng-template">
+  <form name='unitForm'>
+	<ion-modal-view>
+    <!-- Headerbar -->
+		<ion-header-bar class="bar-assertive">
+			<h1 class="title">Add new Unit</h1>
+			<button ng-click="hideModal(1)" class="button icon ion-close"></button>
+		</ion-header-bar>
+
+    <!-- Main Content -->
+		<ion-content has-bouncing="true">
+	          <div class="list card">
+	            <div class="item item-divider">
+	              <h2>Company Name : {{companyName}}</h2>
+	              <h2>Unit Serial no : {{add.serialNo}}</h2>
+	            </div>
+
+	            <label class="item item-input item-stacked-label">
+	            	<span class="input-label">Model</span>
+	             	<input type="text" ng-model="add.model" required/>
+	            </label>
+	            <label class="item item-input item-stacked-label">
+	            	<span class="input-label">Location</span>
+	             	<input type="text" ng-model="add.location" required/>
+	            </label>
+	            <label class="item item-input item-stacked-label">
+	            	<span class="input-label">Date Aquired</span>
+	              	<input type="date" placeholder="Date Purchased" ng-model="add.dop" required/>
+	            </label>
+	            <label class="item item-input item-stacked-label">	
+	            	<span class="input-label">Date Refilled</span>
+	              	<input type="date" placeholder="Date Refilled" ng-model="add.date_refilled" />
+	            </label>
+	            <label class="item item-input item-stacked-label">
+	            	<span class="input-label">Expiration Date</span>
+	              	<input type="date" placeholder="Expiration date" ng-model="add.expiration_date" required/>
+	            </label>
+	          </div>
+    </ion-content>
+
+    <!-- Footer -->
+    <div class="bar bar-footer bar-assertive">
+      <div class="button-bar">
+        <button ng-disabled="unitForm.$invalid" class="button button-clear" ng-click="addUnit(add)" >Save</button>
+        <button class="button button-clear" ng-click="hideModal(1)">Cancel</button>
+      </div>
+    </div>
+  </ion-modal-view>
+  </form>
+</script>
+
+<script id="checklist-modal.html" type="text/ng-template">
+  <form name='updateForm'>
+  <ion-modal-view>
+    <!-- Headerbar -->
+    <ion-header-bar class="bar-assertive">
+      <h1 class="title">Inspection Checklist</h1>
+      <button ng-click="hideModal(2)" class="button icon ion-close"></button>
+    </ion-header-bar>
+
+    <!-- Main Content -->
+    <ion-content has-bouncing="true">
+          <ul class="list">
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox1"/>
+              </label>
+              Discharge hose nozzle is in good
+              condition and not clogged, cracked,
+              or broken.
+            </li>
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox2"/>
+              </label>
+              It is mounted in an easily accessible 
+              area, with nothing stacked around it. 
+            </li>
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox3"/>
+              </label>
+              Safety Pin is in place and unit not damaged.
+            </li>
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox4"/>
+              </label>
+              Pressure gauge is in the green and
+              not damaged or showing “recharge”
+            </li>
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox5"/>
+              </label>
+              Label is readable and displays the
+              type of extinguisher and the
+              instructions for use
+            </li>
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox6"/>
+              </label>
+              It is not rusty, or has any type of
+              corrosion build up
+            </li>
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox7"/>
+              </label>
+              Extinguisher was turned upside down
+              at least three times. <span class="balanced">(Shaken)</span>
+            </li>
+            <li class="item item-checkbox item-text-wrap">
+              <label class="checkbox">
+                <input type="checkbox" ng-model="unitChecklist.checkbox8"/>
+              </label>
+              The location of the extinguisher is
+              easily identifiable.<span class="balanced">(Signs)</span>
+            </li>
+            <li class="item">
+                &nbsp
+            </li>
+          </ul>
+    </ion-content>
+
+    <!-- Footer -->
+    <div class="bar bar-footer bar-assertive">
+      <div class="button-bar">
+        <button class="button button-clear" ng-click="inspectUnit(unitChecklist)">Save</button>
+        <button class="button button-clear" ng-click="hideModal(2)">Cancel</button>
+      </div>
+    </div>
+  </ion-modal-view>
+  </form>
+</script>
+
+<script id="details-modal.html" type="text/ng-template">
+  <form name='detailsForm'>
+  <ion-modal-view>
+
+    <!-- Headerbar -->
+    <ion-header-bar class="bar-assertive">
+      <h1 class="title">Update Unit Details</h1>
+      <button ng-click="hideModal(3)" class="button icon ion-close"></button>
+    </ion-header-bar>
+
+    <!-- Main Content -->
+    <ion-content has-bouncing="true">
+              <div class="list card">
+              <div class="item item-divider">
+                <h2>Contorl No : {{unit.serial_no}}</h2>
+                <h2>Current Company : {{companyName}}</h2>
+              </div>
+              <label class="item item-input item-stacked-label item-select">
+                <span class="input-label">New Company</span>
+                <select ng-model="unit.company_id" ng-options="company as company.name for company in companies track by company.id">
+                </select>
+              </label>
+              <label class="item item-input item-stacked-label">
+                <span class="input-label">Model</span>
+                <input type="text" ng-model="unit.model" required/>
+              </label>
+              <label class="item item-input item-stacked-label">
+                <span class="input-label">Location</span>
+                <input type="text" ng-model="unit.location" required/>
+              </label>
+              <label class="item item-input item-stacked-label">
+                <span class="input-label">Date Aquired</span>
+                  <input type="date" placeholder="Date Purchased" ng-model="unit.dop" required/>
+              </label>
+              <label class="item item-input item-stacked-label">  
+                <span class="input-label">Date Refilled</span>
+                  <input type="date" placeholder="Date Refilled" ng-model="unit.date_refilled" />
+              </label>
+              <label class="item item-input item-stacked-label">
+                <span class="input-label">Expiration Date</span>
+                  <input type="date" placeholder="Expiration date" ng-model="unit.expiration_date" required/>
+              </label>
+              </div>
+            </div>
+      </div>
+		</ion-content>
+
+    <!-- footer -->
+    <div class="bar bar-footer bar-assertive">
+      <div class="button-bar">
+        <button class="button button-clear" ng-disabled="detailsForm.$invalid" ng-click="updateDetails(unit)">Save</button>
+        <button class="button button-clear" ng-click="hideModal(3)">Cancel</button>
+      </div>
+    </div>
+	</ion-modal-view>
+  </form>
+</script>
+
+<!-- Add Photo -->
+<script id="add-photo.html" type="text/ng-template">
+ <form name="imgForm">
+  <ion-modal-view>
+    <!-- header bar -->
+    <ion-header-bar class="bar-assertive">
+      <h2 class="title">Add Photo</h2>
+      <button ng-click="hideModal(4)" class="button icon ion-close"></button>
+    </ion-header-bar>
+
+    <!-- main content -->
+    <ion-content>
+      <div class="list card">
+        <div class="item item-body">
+          <img ng-src="{{ imageData.imgURI }}" class="full-image">
+        </div>
+
+        <div class="item item-input">
+          <input type="text"  placeholder="Description" ng-model="imageData.description" required/> 
+        </div>
+
+        <div class="item">&nbsp;</div>
+      </div>
+    </ion-content>
+
+    <!-- footer -->
+    <div class="bar bar-footer bar-assertive">
+      <div class="button-bar">
+          <button class=" button button-clear" ng-disabled="imgForm.$invalid" ng-click="savePhoto(imageData)">
+              Save Photo
+          </button>
+      </div>
+    </div>
+  </ion-modal-view>
+  </form>
+</script>
+
+<!-- Menu popover -->
+<script id="menu-popover.html" type="text/ng-template">
+  <ion-popover-view>
+    <ion-content>
+        <div class="list">
+          <a class="item item-icon-left" ng-click="scanUnit(companyName, companyId); closePopover()">
+              <i class=" icon ion-qr-scanner"></i>
+              Scan Unit
+          </a>
+          <a class="item item-icon-left" ng-href="#/app/search" ng-click="closePopover()">
+              <i class=" icon ion-android-search"></i>
+              Search
+          </a>
+          <a class="item item-icon-left" ng-click="closePopover(); takePicture(unit.serial_no)">
+              <i class=" icon ion-camera"></i>
+              Camera
+          </a>
+          <a class="item item-icon-left" ng-click="closePopover()">
+              <i class="icon ion-android-document"></i>
+              Genrate Report
+          </a>
+          <a class="item item-icon-left" ng-click="closePopover()">
+              <i class="icon ion-android-delete"></i>
+              Delete Records
+          </a>
+        </div>
+    </ion-content>
+  </ion-popover-view>
+</script>

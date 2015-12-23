@@ -1,0 +1,24 @@
+<ion-view view-title="File Uploader">
+  <ion-content>
+    <div class="elem-25">
+      <div class="row">
+        <div class="col text-center">
+          <h2>Upload</h2>
+          <h4>Go ahead and upload records to database</h4>
+        </div>
+      </div>
+      <!-- upload button -->
+      <div class="row">
+        <div class="col col-100 text-center">
+            <!-- hide when database is uploading files -->
+            <img src="img/upload.png" class="img-sm" ng-click="uploadFile()" ng-hide="uploaded" />
+            <h4 ng-hide="uploaded">Tap to Upload file</h4>
+
+            <!-- show when database is uploading files -->
+            <h4 ng-show="uploaded" class="positive">Data has been Uploaded.
+            <br/><small>Tap again to upload more data</small></h4>
+        </div>
+      </div>
+    </div>
+  </ion-content>
+</ion-view>

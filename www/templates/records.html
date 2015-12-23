@@ -1,0 +1,47 @@
+<ion-view view-title="Records">  
+<ion-nav-buttons side="right">
+    <a  class="button icon ion-android-search button-clear" ng-href="#/app/search"></a>
+    <button ng-click="openModal()" class="button icon ion-plus-circled button-clear"></button>
+</ion-nav-buttons>
+<ion-content>
+    <div class="list">
+        <a class="item item-icon-left" ng-repeat="company in companies" ng-href="#/app/company/{{company.id}}/{{company.name}}">
+            <i class="icon ion-ios-folder assertive"></i>
+            <h2>{{ company.name }}</h2>
+            <p>Inspection date : {{company.inspect_date}}</p>
+        </a>
+    </div>
+</ion-content>
+</ion-view>
+
+<script id="addCompanyModal.html" type="text/ng-template">
+<ion-modal-view>
+    <ion-header-bar class="bar-assertive">
+        <h1 class="title">Add Company</h1>
+        <button ng-click="hideModal()" class="button icon ion-close"></button>
+    </ion-header-bar>
+    <ion-content>
+        <form ng-submit="addCompany(company)">
+        <div class="list list-inset">
+            <label class="item item-input">
+                <input ng-model="company.name" type="text" placeholder="Company Name" required />
+            </label>
+            <label class="item item-input">
+                <input ng-model="company.person" type="text" placeholder="Contact Person" required/>
+            </label>
+            <label class="item item-input">
+                <input ng-model="company.number" type="text" placeholder="Contact No." required/>
+            </label>
+            
+            <div class="row">
+                <div class="col">
+                    <input ng-click="hideModal()" type="submit" value="Submit" class="button button-block button-positive" />
+                </div>
+                <div class="col">
+                    <input type="reset" class="button button-block button-assertive" value="Reset Field">
+                </div>
+            </div>
+        </div>
+    </ion-content>
+</ion-modal-view>
+</script>
