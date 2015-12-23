@@ -403,6 +403,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                     .then(function(success){
                         deffered.resolve(success);
                     }, function(error){
+                        alert("createDirInExternal " + e);
                         deffered.reject(error);
                     });
                 });
@@ -455,8 +456,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                         // read the fileEntry dirs
                         var reader = fileEntry.createReader();
                         reader.readEntries(function(entries){
-                            // pass the entries into the view
-                            $scope.entries = entries;
+                            deffered.resolve(entries);
                         });
                     }
 
@@ -608,7 +608,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 // split and join the fileName string
                 // to generate a valid file name and dir
                 var file = fileName.split(' ').join('') + '.pdf';
-                var dir = 'Reports' + company.split(' ').join('') + '/PDFReports';
+                var dir = company.split(' ').join('') + '/PDFReports';
 
                 // Check the dir if it exist before saving the data
                 // if dir don't exist create it and save the data
@@ -634,12 +634,12 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
 
                             }, function(e){
                                 deffered.reject(e);
-                                alert("__saveFile WriteFile1 " + e.code)
+                                alert("__saveFile WriteFile1 " + e.code);
                             });
 
                         }, function(error){
                             deffered.reject(error);
-                            alert("__saveFile CerateDir " + error.code);
+                            alert("__saveFile CreateDir " + error.code);
                         });
                     }
                     else {
