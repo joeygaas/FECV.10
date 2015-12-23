@@ -335,7 +335,14 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
 *@service FileSvc
 *@description file browsin and reading service
 */
-.factory('FileSvc', function($q, $ionicPlatform, $cordovaFile, $cordovaFileOpener2){ 
+.factory('FileSvc', function(
+    $rootScope,
+    $q,
+    $ionicPlatform, 
+    $ionicPopup , 
+    $cordovaFile, 
+    $cordovaFileOpener2
+){ 
     return {
 
         /**
@@ -416,11 +423,11 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
         *@function open
         *@description open a file using default application
         */
-        fileOpener : function(path){
+        fileOpener : function(path, type){
             var deffered = $q.defer();
             try{
                 $ionicPlatform.ready(function(){
-                    $cordovaFileOpener2.open(path).then(function(success){
+                    $cordovaFileOpener2.open(path, type).then(function(success){
                         deffered.resolve(success);
                     }, function(error){
                         alert("fileOpener " + error);
@@ -444,9 +451,44 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             var deffered = $q.defer()
 
             try{
+                // Base path
+                var basePath = cordova.file.externalDataDirectory;
+
                 $ionicPlatform.ready(function(){
-                    // get the dir path localFileSystem
-                    window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory + path, onResolveSuccess, fail);
+                    // check if the dir already exists
+                    $cordovaFile.checkDir(basePath, path).then(function(success){
+                        // get the dir path localFileSystem
+                        window.resolveLocalFileSystemURL(basePath + path, onResolveSuccess, fail);
+
+                    }, function(error){
+                        if(error.code == 1){
+                            var confirm = $ionicPopup.confirm({
+                                title :'Directory Not Pressent',
+                                template : 'Do you want to create it?'
+                            }).then(function(res){
+                                if(res){
+                                    // create the dir
+                                    $cordovaFile.createDir(basePath, path).then(function(success){
+                                        // Notify the user
+                                        var alertPopup = $ionicPopup.alert({
+                                            title : 'Directory Created'
+                                        });
+                                        alertPopup;
+
+                                        // get the dir files
+                                        window.resolveLocalFileSystemURL(basePath + path, onResolveSuccess, fail);
+
+                                    }, function(error){
+                                        alert("readDirExternal createDir " + error.code);
+                                        deffered.reject(error.code);
+                                    });
+                                }
+                            });
+                        }else {
+                            alert("readDirExternal " + error.code);
+                            deffered.reject(error.code);
+                        }
+                    });
 
                     // onResolveSuccess callback
                     function onResolveSuccess(fileEntry){
@@ -489,6 +531,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 });
             } catch(e){
                 alert("removeDirExternal " + e);
+                deffered.reject(e);
             }
 
             return deffered.promise;

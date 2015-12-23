@@ -3,6 +3,42 @@
     
 </ion-nav-buttons>
   <ion-content class="">
-    
+  		<!-- Directory Options -->
+    	<div class="list" ng-hide="fileList">
+    		<a class="item item-icon-left" ng-click="pdfReports()">
+    			<i class="icon ion-folder assertive"></i>
+    			PDF Documents
+    		</a>
+    		<a class="item item-icon-left" ng-click="excelReports()">
+    			<i class="icon ion-folder assertive"></i>
+    			Excel Documents
+    		</a>
+    	</div>
+
+    	<!-- File list -->
+    	<div class="list" ng-show="fileList">
+    		<a class="item item-icon-left" ng-click="upFolder()">
+    			<i class="icon ion-folder assertive"></i>
+    			Back	
+    		</a>
+
+    		<div ng-repeat="file in files">
+    			<!-- PDF Files -->
+	    		<a class="item item-icon-left item-text-wrap" ng-show="isPDF" ng-click="openPdfReport(file.nativeURL)">
+	    			<img ng-src="img/PDF.png" class="icon img-icon padding-5">
+	    			<span class="icon-text dark">{{file.name}}</span>
+	    		</a>
+
+	    		<!-- Excel Files -->
+	    		<a class="item item-icon-left item-text-wrap" ng-show="isExcel">
+	    			<img ng-src="img/excel.png" class="icon img-icon padding-5">
+	    			<span class="icon-text dark">{{file.name}}</span>
+	    		</a>
+    		</div>
+
+    		<div class="item" ng-show="noResults">
+    			No Files Available
+    		</div>
+    	</div>
   </ion-content>
 </ion-view>

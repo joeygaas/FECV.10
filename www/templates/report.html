@@ -1,4 +1,10 @@
 <ion-view view-title="Generate Report">
+  <!--  Nav buttons -->
+  <ion-nav-buttons side="right">
+    <a class="button button-icon ion-ios-browsers" ng-href="#/app/reportsBrowser/{{companyName}}"></a>
+  </ion-nav-buttons>
+
+  <!-- Main Content -->
   <ion-content>
     <div class="list">
     	<a class="item item-icon-left" ng-click="generatePDFReport()">

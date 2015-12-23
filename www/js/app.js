@@ -140,7 +140,7 @@ angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMo
   })
 
   .state('app.reportsBrowser',{
-    url : '/reportsBrowser',
+    url : '/reportsBrowser/:companyName',
     views : {
       'menuContent' : {
         templateUrl : 'templates/reportsBrowser.html',

@@ -51,17 +51,31 @@ a {
   height: 100px;
 }
 
+/* custom icons */
+.img-icon {
+  width: 50px !important;
+  height:50px !important;
+}
+.icon-text {
+  margin-left: 10px !important;
+}
+
 /* element positioning */
 .elem-25 {
   margin-top: 25%;
 }
-
 .elem-30 {
   margin-top: 30%;
+}
+.text-center {
+  line-height: 50px;
 }
 
 /* element padding */
 .padding-none {
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.padding-5 {
+  padding : 5px !important;
 }

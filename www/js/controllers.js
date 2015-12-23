@@ -517,7 +517,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description get the checklist1 failed units
     */
     $scope.displayChecklist1Failed = function(){
-        $scope.summaryTitle = "Discharge Hose/nozzle is not in good shape.";
+        $scope.summaryTitle = "Deffective Discharge Hose or Nozzle";
 
         $scope.getChecklist1Failed().then(function(res){
             if(res.length != 0){
@@ -552,7 +552,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description get the checklist2 failed units
     */
     $scope.displayChecklist2Failed = function(){
-        $scope.summaryTitle = "Not mounted in an easily accessible area.";
+        $scope.summaryTitle = "Not Easily Accessible";
 
         $scope.getChecklist2Failed().then(function(res){
             if(res.length != 0){
@@ -587,7 +587,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description get the checklist3 failed units
     */
     $scope.displayChecklist3Failed = function(){
-        $scope.summaryTitle = "Safety Pin is not in place and damaged.";
+        $scope.summaryTitle = "Safety Pin Is Damaged Or Not In Place";
 
         $scope.getChecklist3Failed().then(function(res){
             if(res.length != 0){
@@ -622,7 +622,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description get the checklist4 failed units
     */
     $scope.displayChecklist4Failed = function(){
-        $scope.summaryTitle = "Pressure gauge is not in the green or damaged or showing “recharge”";
+        $scope.summaryTitle = "Pressure Gauge is Damaged Or Showing “Recharge”";
 
         $scope.getChecklist4Failed().then(function(res){
             if(res.length != 0){
@@ -657,7 +657,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description get the checklist5 failed units
     */
     $scope.displayChecklist5Failed = function(){
-        $scope.summaryTitle = "Label is not readable, don't display the type of fire extinguisher and the instructions for use";
+        $scope.summaryTitle = "Label Problem";
 
         $scope.getChecklist5Failed().then(function(res){
             if(res.length != 0){
@@ -692,7 +692,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description get the checklist6 failed units
     */
     $scope.displayChecklist6Failed = function(){
-        $scope.summaryTitle = "Rusty, or has any type of corrosion build up.";
+        $scope.summaryTitle = "Rusty, Or Has Corrosion Build Up";
 
         $scope.getChecklist6Failed().then(function(res){
             if(res.length != 0){
@@ -727,7 +727,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description get the checklist8 failed units
     */
     $scope.displayChecklist8Failed = function(){
-        $scope.summaryTitle = "The location of the extinguisher is not easily identifiable.  (signs)";
+        $scope.summaryTitle = "The location Is Not Easily Identifiable";
 
         $scope.getChecklist8Failed().then(function(res){
             if(res.length != 0){
@@ -1733,6 +1733,15 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $ionicPopup,
     PDFSvc
 ){
+    /**
+    *@process 
+    *@description This process will run every when this page is loaded
+    */
+    $scope.$on('$ionicView.enter', function(e){
+        $scope.companyName = localStorage.getItem('company');
+         __activate();
+    });
+
 
     /**
     *@function activate
@@ -1802,8 +1811,6 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $scope.generateExcelReport = function(){
         console.log('Working fine');
     };
-
-    __activate();
 })
 
 
@@ -1811,22 +1818,81 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 *@controller ReportsBrowserCtrl
 *@description reports browser controller
 */
-.controller('ReportsBrowserCtrl', function($scope, FileSvc){
-
+.controller('ReportsBrowserCtrl', function(
+    $scope,
+    $stateParams,
+    FileSvc
+){
     /**
     *@process 
     *@description This process will run every when this page is loaded
     */
     $scope.$on('$ionicView.enter', function(e){
-        // Test the code here...
+
     }); 
 
     /**
-    *@function PDFDocs
+    *@variable declaration 
+    *@description file paths
+    */
+    var PDFFilePath = $stateParams.companyName.split(' ').join('') + '/PDFReports';
+    var ExcelFilePath = $stateParams.companyName.split(' ').join('') + '/ExcelReports';
+
+    /**
+    *@function PdfReports
     *@description generate a list of available pdf docs that
     *@is stored in the application data storage
     */
-    $scope.reports = function(){
-        FileSvc.readDirExternal()
+    $scope.pdfReports = function(){
+        $scope.fileList = true;
+
+        FileSvc.readDirExternal(PDFFilePath).then(function(files){
+            if(files.length != 0){
+                $scope.isExcel = false;
+                $scope.isPDF = true;
+                $scope.noResults = false;
+                $scope.files = files;
+            }else {
+                $scope.isExcel = false;
+                $scope.noResults = true;
+            }
+        });
+    }
+
+    /**
+    *@function ExcelReports
+    *@description generate a list of available excel docs docs that
+    *@is stored in the application data storage
+    */
+    $scope.excelReports = function(){
+        $scope.fileList= true;
+
+        FileSvc.readDirExternal(ExcelFilePath).then(function(files){
+            if(files.length != 0){
+                $scope.isExcel = true;
+                $scope.isPDF = false;
+                $scope.noResults = false;
+                $scope.files = files;
+            }else {
+                $scope.isPDF = false;
+                $scope.noResults = true;
+            }
+        });
+    }
+
+    /**
+    *@function openReport
+    *@description open a file using default app
+    */
+    $scope.openPdfReport = function(path){
+        FileSvc.fileOpener(path, 'application/pdf');
+    }
+
+    /**
+    *@function upFolder
+    *@description back to the documents options
+    */
+    $scope.upFolder = function(){
+        $scope.fileList = false;
     }
 });
