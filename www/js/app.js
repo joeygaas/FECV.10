@@ -148,11 +148,11 @@ angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMo
     }
   })
   
-  .state('app.share', {
-    url: '/share',
+  .state('app.syncData', {
+    url: '/syncData',
     views: {
         'menuContent': {
-            templateUrl: 'templates/share.html'
+            templateUrl: 'templates/syncData.html'
         }
     }
   })

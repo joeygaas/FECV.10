@@ -20,5 +20,27 @@
      before you can use the import file to DB 
    - App is in development stage so some of the features are not yet fully functional
 
+## FECV1.0 BUGS
+      - start inspection wont update the view
+      - scanner confirmation button also click  other buttons
+      - delete img wont delete img in file sys
+      - input type file wont work on 4.4 +  (fixed)
+## TODO
+      -records
+         -import records (done)
+            - import button minor bug
+         -unit list -delete records(ongoing)
+         -location list -delete records(ongoing)
+         -search(done)
+         -Generate Report
+            -generate pdf file(done)
+            -open pdf file(done)
+
+            -generate excel file(ongoing)
+            -open pdf file(ongoing)
+
+            -fileBrowser(done)
+               -UI minor bug found
+         
 
   
