@@ -515,8 +515,8 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
         },
 
         /**
-        *@function remove
-        *@description remove a file in the storage
+        *@function removeDirExternal
+        *@description remove all file in the selected dir path
         */
         removeDirExternal : function(dirPath){
             var deffered = $q.defer();
@@ -535,7 +535,38 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             }
 
             return deffered.promise;
+        },
+
+        /**
+        *@function removeFile
+        *@description remove a single file
+        */
+        removeFileExternal : function(filePath){
+            var deffered = $q.defer();
+            try {
+                // Remove the slash in the front of the filePath
+                if(filePath.charAt(0) === '/'){
+                    var validFilePath = filePath.slice( 1 );  
+                }
+
+                $ionicPlatform.ready(function(){
+                    // base path of the file
+                    var basePath = cordova.file.externalDataDirectory;
+
+                    $cordovaFile.removeFile(basePath, validFilePath).then(function(success){
+                        deffered.resolve(success);
+                    }, function(error){
+                        alert("removeFile " + error);
+                        deffered.reject(e);
+                    });
+                });
+            } catch(e){
+                alert("removeFileExternal " + e);
+                deffered.reject(e);
+            }
+            return deffered.promise;
         }
+
     };
 })
 

@@ -42,7 +42,6 @@ angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMo
 
 .config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
-
     .state('app', {
     url: '/app',
     abstract: true,

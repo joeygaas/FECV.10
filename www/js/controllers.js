@@ -1821,6 +1821,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 .controller('ReportsBrowserCtrl', function(
     $scope,
     $stateParams,
+    $ionicPopup,
     FileSvc
 ){
     /**
@@ -1844,6 +1845,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@is stored in the application data storage
     */
     $scope.pdfReports = function(){
+        $scope.showLoading()
         $scope.fileList = true;
 
         FileSvc.readDirExternal(PDFFilePath).then(function(files){
@@ -1852,9 +1854,14 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                 $scope.isPDF = true;
                 $scope.noResults = false;
                 $scope.files = files;
+
+                $scope.hideLoading();
             }else {
                 $scope.isExcel = false;
+                $scope.isPDF = false;
                 $scope.noResults = true;
+
+                $scope.hideLoading();
             }
         });
     }
@@ -1865,6 +1872,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@is stored in the application data storage
     */
     $scope.excelReports = function(){
+        $scope.showLoading();
         $scope.fileList= true;
 
         FileSvc.readDirExternal(ExcelFilePath).then(function(files){
@@ -1873,9 +1881,14 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                 $scope.isPDF = false;
                 $scope.noResults = false;
                 $scope.files = files;
+
+                $scope.hideLoading();
             }else {
+                $scope.isExcel = false;
                 $scope.isPDF = false;
                 $scope.noResults = true;
+
+                $scope.hideLoading();
             }
         });
     }
@@ -1886,6 +1899,30 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.openPdfReport = function(path){
         FileSvc.fileOpener(path, 'application/pdf');
+    }
+
+    /**
+    *@function removeReport
+    *@description remove a file in the externalDataDirectory
+    */
+    $scope.removePdfReport = function(path){
+        try{
+            // Ask for user confirmation
+            var confirmation = $ionicPopup.confirm({
+                title : 'Delete Report',
+                template : 'Are you sure you want to delete this file permanently'
+            }).then(function(res){
+                if(res){
+                    // remove the file 
+                    FileSvc.removeFileExternal(path).then(function(success){
+                        // Update the view
+                        $scope.pdfReports(PDFFilePath);
+                    });
+                }
+            });
+        } catch(e){
+            alert(e);
+        }
     }
 
     /**

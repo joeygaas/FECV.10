@@ -45,21 +45,6 @@ a {
   text-align: center;
 }
 
-/* Images Style */
-.img-sm {
-  width : 100px;
-  height: 100px;
-}
-
-/* custom icons */
-.img-icon {
-  width: 50px !important;
-  height:50px !important;
-}
-.icon-text {
-  margin-left: 10px !important;
-}
-
 /* element positioning */
 .elem-25 {
   margin-top: 25%;
@@ -68,7 +53,7 @@ a {
   margin-top: 30%;
 }
 .text-center {
-  line-height: 50px;
+  float: right;
 }
 
 /* element padding */
@@ -79,3 +64,5 @@ a {
 .padding-5 {
   padding : 5px !important;
 }
+
+/* Custom icons */
