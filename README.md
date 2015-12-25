@@ -36,7 +36,7 @@
             -generate pdf file(done)
             -open pdf file(done)
 
-            -generate excel file(onging)
+            -generate excel file(done)
             -open excel file(done)
 
             -fileBrowser(done)
