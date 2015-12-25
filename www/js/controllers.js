@@ -1665,6 +1665,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $ionicLoading,
     $ionicPlatform,
     $ionicPopup,
+    $timeout,
     FileSvc,
     UnitSvc,
     ExcelSvc
@@ -1681,9 +1682,14 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                 ExcelSvc.parse(res).then(function(data){
                     // save to db
                     $scope.saveToDB(data);
+
+                    // show the uploaded text for 3 sec
+                    $timeout(function(){
+                        $scope.uploaded = true;
+                    }, 3000)
                 });
             });
-        $scope.uploaded = true;
+        $scope.uploaded = false;
     };
 
     /**
