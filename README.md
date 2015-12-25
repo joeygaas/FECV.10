@@ -40,7 +40,6 @@
             -open excel file(done)
 
             -fileBrowser(done)
-               -UI minor bug found
          
 
   
