@@ -21,25 +21,26 @@
    - App is in development stage so some of the features are not yet fully functional
 
 ## FECV1.0 BUGS
-      - start inspection wont update the view
-      - scanner confirmation button also click  other buttons
-      - delete img wont delete img in file sys
-      - input type file wont work on 4.4 +  (fixed)
+   - start inspection wont update the view (fixed)
+   - scanner confirmation button also click  other buttons(ionic issue)
+   - delete img wont delete img in file sys(ongoing)
+   - photo should be save inside the company folder in external data storage(ongoing)
+   - photo camera onrientation(ongoing)
+   - input type file wont work on 4.4 +  (fixed)
 ## TODO
-      -records
-         -import records (done)
-            - import button minor bug
-         -unit list -delete records(ongoing)
-         -location list -delete records(ongoing)
-         -search(done)
-         -Generate Report
-            -generate pdf file(done)
-            -open pdf file(done)
-
-            -generate excel file(done)
-            -open excel file(done)
-
-            -fileBrowser(done)
+   -Records
+      - Import records (done)
+         - import button minor bug
+      - Unit list -delete records(ongoing)
+      - Location list -delete records(ongoing)
+      - Search(done)
+      - Generate Report
+         - Generate pdf file(done)
+         - Open pdf file(done)
+         - Generate excel file(done)
+         - Open excel file(done)
+         - FileBrowser(done)
+      
          
 
   

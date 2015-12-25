@@ -841,6 +841,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                 CompanySvc.query(query1, param);
                 $scope.started = true;
                 $scope.lastInspect = param[0];
+
+                // Update the view
+                $scope.statusReport();
             }
         });
     }
