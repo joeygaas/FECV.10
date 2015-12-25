@@ -1731,7 +1731,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $ionicModal, 
     $ionicLoading,
     $ionicPopup,
-    PDFSvc
+    PDFSvc,
+    ExcelSvc
 ){
     /**
     *@process 
@@ -1783,8 +1784,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description generate PDF File
     */
     $scope.generatePDFReport = function(){
-        // ask for confirmation to the user
-        // because this may take a while deppending on how fast is your mobiel device
+        // ask confirmation to the user
+        // because this may take a while deppending on how fast is your mobile device
         var confirmation = $ionicPopup.confirm({
             title: 'Generate PDF File',
             template : 'This may take a while. Do you want to proceed?'
@@ -1794,7 +1795,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                     // Notify the user that the pdf file has been generated
                     var alertPopup  = $ionicPopup.alert({
                         title : 'PDF File has been generated',
-                        template : 'You can view it now in the report browser'
+                        template : 'You can view it now in the reports browser'
                     });
                     alertPopup;
                 });
@@ -1809,7 +1810,27 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description generate excel file
     */
     $scope.generateExcelReport = function(){
-        console.log('Working fine');
+        try{
+            // Ask confirmation to the user
+            // because this may take a while depending on how fast is you mobile device
+            var confirmation = $ionicPopup.confirm({
+                title : 'Generate Excel File',
+                template : 'This may take a while. Do you want to proceed?'
+            }).then(function(res){
+                if(res){
+                    ExcelSvc.generate().then(function(success){
+                        // Notify the user
+                        var alertPopup = $ionicPopup.alert({
+                            title : 'Excel file has been generated',
+                            template : 'You can view it now in the reports browser'
+                        });
+                        alertPopup;
+                    });
+                }
+            });
+        } catch(e){
+            alert("generateExcelReport " + e);
+        }
     };
 })
 
@@ -1867,6 +1888,38 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     }
 
     /**
+    *@function openReport
+    *@description open a file using default app
+    */
+    $scope.openPdfReport = function(path){
+        FileSvc.fileOpener(path, 'application/pdf');
+    }
+
+    /**
+    *@function removeReport
+    *@description remove a file in the externalDataDirectory
+    */
+    $scope.removePdfReport = function(path){
+        try{
+            // Ask for user confirmation
+            var confirmation = $ionicPopup.confirm({
+                title : 'Delete Report',
+                template : 'Are you sure you want to delete this file permanently'
+            }).then(function(res){
+                if(res){
+                    // remove the file 
+                    FileSvc.removeFileExternal(path).then(function(success){
+                        // Update the view
+                        $scope.pdfReports(PDFFilePath);
+                    });
+                }
+            });
+        } catch(e){
+            alert(e);
+        }
+    }
+
+    /**
     *@function ExcelReports
     *@description generate a list of available excel docs docs that
     *@is stored in the application data storage
@@ -1894,18 +1947,18 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     }
 
     /**
-    *@function openReport
-    *@description open a file using default app
+    *@function openExcelReport
+    *@description open file using default app
     */
-    $scope.openPdfReport = function(path){
-        FileSvc.fileOpener(path, 'application/pdf');
+    $scope.openExcelReport = function(path){
+        FileSvc.fileOpener(path, 'application/octet-stream');
     }
 
     /**
     *@function removeReport
     *@description remove a file in the externalDataDirectory
     */
-    $scope.removePdfReport = function(path){
+    $scope.removeExcelReport = function(path){
         try{
             // Ask for user confirmation
             var confirmation = $ionicPopup.confirm({
@@ -1916,7 +1969,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                     // remove the file 
                     FileSvc.removeFileExternal(path).then(function(success){
                         // Update the view
-                        $scope.pdfReports(PDFFilePath);
+                        $scope.excelReports(ExcelFilePath);
                     });
                 }
             });

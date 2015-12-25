@@ -33,20 +33,20 @@
 
 	    			<!-- Delete Button -->
 	    			<a class="button button-assertive button-clear" ng-click="removePdfReport(file.fullPath)">
-	    				<i class="icon ion-trash-b" ng-click="removePdfReport(file.fullPath)"></i>
+	    				<i class="icon ion-trash-b"></i>
 	    			</a>
 	    		</div>
 
 	    		
 	    		<div class="item item-icon-left item-button-right item-text-wrap" ng-show="isExcel">
 	    			<!-- Click to View PDF report -->
-	    			<a ng-click="">
+	    			<a ng-click="openExcelReport(file.nativeURL)">
 	    				<i class="icon icon-file-excel assertive"></i>
 	    				{{file.name}}
 	    			</a>
 	    			
 	    			<!-- Delete Button -->
-	    			<button class="button button-assertive button-clear">
+	    			<button class="button button-assertive button-clear" ng-click="removeExcelReport(file.fullPath)">
 	    				<i class="icon ion-trash-b"></i>
 	    			</button>
 	    		</div>

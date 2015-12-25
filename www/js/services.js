@@ -162,6 +162,8 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             params[5] = date_refilled;
             params[6] = expiration_date;
 
+            // TODO :: add more data here
+
             $ionicPlatform.ready(function(){
                 var query = "INSERT INTO units(serial_no, model, company_id, location, dop, date_refilled, expiration_date) VALUES(?, ?, ?, ?, ?, ?, ?)";
                 $cordovaSQLite.execute(db, query, params)
@@ -566,7 +568,6 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             }
             return deffered.promise;
         }
-
     };
 })
 
@@ -574,14 +575,202 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
 *@service ExcelSvc
 *@function excel services
 */
-.factory('ExcelSvc', function($q){
+.factory('ExcelSvc', function($q, $rootScope, $cordovaFile, $ionicPlatform){
+        /**
+        *@function __showLoading
+        *@description Loading UI function :: utility function that will show the loading status in the UI
+        */
+        function __showLoading(msg){
+            $rootScope.$broadcast('ExcelSvc::Progress', msg);
+        }
+
+        /**
+        *@function __hideLoading
+        *@description Loading UI function :: utility function that will hide the loading status in the UI
+        */
+        function __hideLoading(){
+            $rootScope.$broadcast('ExcelSvc::Done');
+        }
+
+        /**
+        *@function __generateExcelFile
+        *@description generate excel file
+        */
+        function __generateExcelFile(data, ws_name){
+            var deffered = $q.defer();
+            try{
+
+               function datenum(v, date1904) {
+                    if(date1904) v+=1462;
+                    var epoch = Date.parse(v);
+                    return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
+                }
+                 
+                function sheet_from_array_of_arrays(data, opts) {
+                    var ws = {};
+                    var range = {s: {c:10000000, r:10000000}, e: {c:0, r:0 }};
+                    for(var R = 0; R != data.length; ++R) {
+                        for(var C = 0; C != data[R].length; ++C) {
+                            if(range.s.r > R) range.s.r = R;
+                            if(range.s.c > C) range.s.c = C;
+                            if(range.e.r < R) range.e.r = R;
+                            if(range.e.c < C) range.e.c = C;
+                            var cell = {v: data[R][C] };
+                            if(cell.v == null) continue;
+                            var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
+                            
+                            // check for the cell.v data type
+                            if(typeof cell.v === 'number') cell.t = 'n';
+                            else if(typeof cell.v === 'boolean') cell.t = 'b';
+                            else if(cell.v instanceof Date) {
+                                cell.t = 'n'; cell.z = XLSX.SSF._table[14];
+                                cell.v = datenum(cell.v);
+                            }
+                            else cell.t = 's';
+                            
+                            ws[cell_ref] = cell;
+                        }
+                    }
+                    if(range.s.c < 10000000) ws['!ref'] = XLSX.utils.encode_range(range);
+                    return ws;
+                }
+                 
+                function Workbook() {
+                    if(!(this instanceof Workbook)) return new Workbook();
+                    this.SheetNames = [];
+                    this.Sheets = {};
+                }
+                 
+                var wb = new Workbook(), ws = sheet_from_array_of_arrays(data);
+                 
+                /* add worksheet to workbook */
+                wb.SheetNames.push(ws_name);
+                wb.Sheets[ws_name] = ws;
+                var wbout = XLSX.write(wb, {bookType:'xlsx', bookSST:true, type: 'binary'});
+
+                //saveAs(new Blob([s2ab(wbout)],{type:"application/octet-stream"}), "test.xlsx")
+                blobUtil.binaryStringToBlob(wbout, "application/octet-stream").then(function (blob) {
+                    deffered.resolve(blob);
+                }).catch(function (err) {
+                  alert("binaryStringToBlob " + err);
+                  deffered.reject(err);
+                });
+
+            } catch(e){
+                alert("generate " + e);
+                deffered.reject(e);
+            }
+
+            return deffered.promise;
+        }
+
+        /**
+        *@function __save
+        *@description save the file inthe application external data directory
+        */
+        function __saveFile(excelBlob, fileName, company) {
+            var deffered = $q.defer();
+            $ionicPlatform.ready(function(){
+                try {
+
+                    // split and join the fileName string
+                    // to generate a valid file name and dir
+                    var file = fileName.split(' ').join('') + '.xlsx';
+                    var dir = company.split(' ').join('') + '/ExcelReports';
+
+                    // Check the dir if it exist before saving the data
+                    // if dir don't exist create it and save the data
+                    $cordovaFile.checkDir(cordova.file.externalDataDirectory, dir).then(function(success){
+                        // write the file using ngCordova file api
+                        $cordovaFile.writeFile(cordova.file.externalDataDirectory + dir, file, excelBlob, {'append' : false})
+                        .then(function(success){
+                            deffered.resolve(success);
+
+                        }, function(e){
+                            deffered.reject(e);
+                            alert("__saveFile WriteFile1 " + e.code)
+
+                        });
+                    }, function(error){
+                        if(error.code == 1){
+                            // Create the missing dir
+                            $cordovaFile.createDir(cordova.file.externalDataDirectory, dir).then(function(success){
+                                // Write the file
+                                $cordovaFile.writeFile(cordova.file.externalDataDirectory + dir, file, excelBlob, {'append' : false})
+                                .then(function(success){
+                                    deffered.resolve(success);
+
+                                }, function(e){
+                                    deffered.reject(e);
+                                    alert("__saveFile WriteFile1 " + e.code);
+                                });
+
+                            }, function(error){
+                                deffered.reject(error);
+                                alert("__saveFile CreateDir " + error.code);
+                            });
+                        }
+                        else {
+                            deffered.reject(error);
+                            alert("__saveFile CheckDir " + error.code);
+                        }
+                    });
+
+                } catch(e){
+                    deffered.reject(e);
+                    alert("__saveFile " + e);
+                }
+            });
+
+            return deffered.promise;
+        }
+
     return {
         /**
         *@function generate
         *@description generate excel file
         */
-        generate : function(data){
+        generate : function(){
+            var deffered = $q.defer();
+                try{
+                // get data from the localStorage
+                //var data = angular.fromJson(localStorage.getItem('report'));
+                // get the company name
+                var company = localStorage.getItem('company');
+                //alert(localStorage.getItem('company'));
+                // get the document name
+                var docTitle = localStorage.getItem('docTitle');
+                //alert(localStorage.getItem('docTitle'));
 
+                /* original data */
+                var data = [
+                        ['model','serial_no','dob'],
+                        ['HCFC-123', 'SAFWAY000001', '12/12/2015'],
+                        ["foo","bar", "0.3"],
+                        ["baz", "Some text", "qux"]
+                    ];
+
+                var ws_name = "SheetJS";
+
+                // genereate Excel file
+                __showLoading("Generating Excel File...");
+                __generateExcelFile(data, ws_name).then(function(excelBlob){
+                    __showLoading("Saving File...");
+                    return __saveFile(excelBlob, docTitle, company);
+                }).then(function(success){
+                    __hideLoading();
+                    deffered.resolve(success);
+                }, function(error){
+                    __hideLoading();
+                    alert("saveFile " + error);
+                    deffered.reject(error);
+                });
+            } catch(e){
+                alert("generate " + e);
+                deffered.reject(e);
+            }
+
+            return deffered.promise;
         },
 
         /**
