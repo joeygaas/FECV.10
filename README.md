@@ -26,6 +26,7 @@
    - delete img wont delete img in file sys(fixed)
    - photo camera onrientation(fixed)
    - input type file wont work on 4.4 +  (fixed)
+   
 ## TODO
    -Records
       - Import records (done)
