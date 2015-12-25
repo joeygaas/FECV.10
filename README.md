@@ -36,8 +36,8 @@
             -generate pdf file(done)
             -open pdf file(done)
 
-            -generate excel file(ongoing)
-            -open pdf file(ongoing)
+            -generate excel file(onging)
+            -open excel file(done)
 
             -fileBrowser(done)
                -UI minor bug found
