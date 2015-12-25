@@ -1439,18 +1439,19 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         $ionicPlatform.ready(function(){
             var options = {
                 quality: 80,
-                destinationType: Camera.DestinationType.FILE_URI,
+                destinationType: Camera.DestinationType.DATA_URL,
                 sourceType: Camera.PictureSourceType.CAMERA,
                 allowEdit: false,
                 encodingType: Camera.EncodingType.JPEG,
                 targetWidth: 250,
                 targetHeight: 250,
                 popoverOptions: CameraPopoverOptions,
-                saveToPhotoAlbum: false
+                saveToPhotoAlbum: false,
+                correctOrientation: true
             };
 
-            $cordovaCamera.getPicture(options).then(function(imageURI){
-                $scope.addPhotoFrm(imageURI);
+            $cordovaCamera.getPicture(options).then(function(imageURL){
+                $scope.addPhotoFrm('data:image/jpeg;base64,' + imageURL);
             }, function(error){
                 // Error occured
                 alert("Error : " + error);
@@ -1466,7 +1467,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $scope.addPhotoFrm = function(data){
         $scope.imageData = {};
         $scope.imageData.unitSerial = $stateParams.serial;
-        $scope.imageData.imgURI = data;
+        $scope.imageData.imgURL = data;
         $scope.openModal(4);
     }
 

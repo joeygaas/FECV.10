@@ -261,7 +261,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 var params = [];
                 params[0] = photoObj.unitSerial;
                 params[1] = photoObj.description;
-                params[2] = photoObj.imgURI;
+                params[2] = photoObj.imgURL;
 
                 // get the date today
                 var dateToday = new Date();
