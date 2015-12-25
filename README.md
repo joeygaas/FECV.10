@@ -30,7 +30,7 @@
 ## TODO
    - Records
       - Import records (done)
-         - import button minor bug
+         - import button minor bug(done)
       - Unit list -delete records(ongoing)
       - Location list -delete records(ongoing)
       - Search(done)
