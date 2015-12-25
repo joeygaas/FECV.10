@@ -758,6 +758,14 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             return deffered.promise;
         }
 
+        /**
+        *@function __summaryReportFrmt
+        *@description generate a summary report format about the company
+        */
+        function __summaryReportFrmt(data){
+
+        }
+
     return {
         /**
         *@function generate
