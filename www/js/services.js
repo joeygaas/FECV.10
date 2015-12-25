@@ -657,7 +657,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 });
 
             } catch(e){
-                alert("generate " + e);
+                alert("__generate " + e);
                 deffered.reject(e);
             }
 
@@ -734,21 +734,54 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             try{
                 // template array
                 var tpl = [
-                            ['model', 'serial_no', 'inspection_date', 'dop', 'expiration_date', 'date_refilled', 'location', 'Hose/Nozzle', 'accessible', 'safety_pin', 'pressure_gauge', 'label', 'corrosion', 'signs']
+                            ['model', 
+                            'serial_no', 
+                            'inspection_date', 
+                            'dop', 
+                            'expiration_date', 
+                            'date_refilled', 
+                            'location', 
+                            'Hose/Nozzle', 
+                            'accessible', 
+                            'safety_pin', 
+                            'pressure_gauge', 
+                            'label', 
+                            'corrosion', 
+                            'turned_upside_down', 
+                            'signs', 
+                            'status', 
+                            'missing']
                           ];
 
                 for(var i = 0; i < data.length; i++){
                     // convert object to array 
-                    var value = Object.keys(data[i]).map(function(key){
-                        return data[i][key];
-                    });
+                    var value = [];
+
+                    // push all object data into the array using for in 
+                    // to insure that this code will work the same in all devices
+                    value.push(data[i].model);
+                    value.push(data[i].serial_no);
+                    value.push(data[i].inspection_date);
+                    value.push(data[i].dop);
+                    value.push(data[i].expiration_date);
+                    value.push(data[i].date_refilled);
+                    value.push(data[i].location);
+                    value.push(data[i].checklist1);
+                    value.push(data[i].checklist2);
+                    value.push(data[i].checklist3);
+                    value.push(data[i].checklist4);
+                    value.push(data[i].checklist5);
+                    value.push(data[i].checklist6);
+                    value.push(data[i].checklist7);
+                    value.push(data[i].checklist8);
+                    value.push(data[i].status);
+                    value.push(data[i].missing);
 
                     // store the value into the template
-                    tpl.push(value.splice(0, 2));
+                    tpl.push(value);
                 }
 
                 deffered.resolve(tpl);
-                console.log(tpl);
 
             } catch(e){
                 alert("__completeReportFrmt " + e);
@@ -763,7 +796,50 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
         *@description generate a summary report format about the company
         */
         function __summaryReportFrmt(data){
+            var deffered = $q.defer();
+            try{
+                // Summary template
+                var tpl = [
+                            ["Last Inspection",
+                            "Total Units", 
+                            "Operational", 
+                            "Deffective", 
+                            "Missing Units", 
+                            "Not Inspected", 
+                            "deffective Discharge hose nozzle", 
+                            "Not Easily accessible", 
+                            "Safety pin not inplace", 
+                            "Deffective pressure gauge/showing recharge",
+                            "Label not readable",
+                            "Rusty or has corrosion",
+                            "Location not easily identifiable"]
+                          ];
 
+                var value = [];
+
+                value.push(data.lastInspect);
+                value.push(data.totalUnits);
+                value.push(data.good);
+                value.push(data.deffective);
+                value.push(data.missingUnits);
+                value.push(data.notInspectedUnits);
+                value.push(data.checklist1Total);
+                value.push(data.checklist2Total);
+                value.push(data.checklist3Total);
+                value.push(data.checklist4Total);
+                value.push(data.checklist5Total);
+                value.push(data.checklist6Total);
+                value.push(data.checklist8Total);
+
+                tpl.push(value);
+
+                deffered.resolve(tpl);
+
+            } catch(e){
+                alert("__summaryReportFrmt " + e);
+                deffered.reject(e);
+            }
+            return deffered.promise;
         }
 
     return {
@@ -785,22 +861,41 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
 
                 var ws_name = "docTitle";
 
-                // genereate Excel file
-                __showLoading("Preparing data...");
-                __completeReportFrmt(data).then(function(tpl){
-                    __showLoading('Generating Excel File');
-                    return __generateExcelFile(tpl, ws_name);
-                }).then(function(excelBlob){
-                    __showLoading('Saving File...');
-                    return __saveFile(excelBlob, docTitle, company);
-                }).then(function(success){
-                    __hideLoading();
-                    deffered.resolve(success);
-                }, function(error){
-                    __hideLoading();
-                    alert("savFile " + error);
-                    deffered.reject(error);
-                });
+                if(angular.isArray(data)){
+                    // generate a complete report format
+                    __showLoading("Preparing data...");
+                    __completeReportFrmt(data).then(function(tpl){
+                        __showLoading('Generating Excel File');
+                        return __generateExcelFile(tpl, ws_name);
+                    }).then(function(excelBlob){
+                        __showLoading('Saving File...');
+                        return __saveFile(excelBlob, docTitle, company);
+                    }).then(function(success){
+                        __hideLoading();
+                        deffered.resolve(success);
+                    }, function(error){
+                        __hideLoading();
+                        alert("saveFile " + error);
+                        deffered.reject(error);
+                    });
+                } else{
+                    // generate a summary report format
+                    __showLoading('Preparing data...');
+                    __summaryReportFrmt(data).then(function(tpl){
+                        __showLoading('Generating Excel File');
+                        return __generateExcelFile(tpl, ws_name);
+                    }).then(function(excelBlob){
+                        __showLoading('Saving File...');
+                        return __saveFile(excelBlob, docTitle, company);
+                    }).then(function(success){
+                        __hideLoading();
+                        deffered.resolve(success);
+                    }, function(error){
+                        __hideLoading();
+                        alert("saveFile " + error);
+                        deffered.reject(error);
+                    });
+                }
             } catch(e){
                 alert("generate " + e);
                 deffered.reject(e);

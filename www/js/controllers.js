@@ -1754,8 +1754,14 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         $scope.$on('PDFSvc::Progress', function(evt, msg){
             __showLoading(msg);
         });
-
         $scope.$on('PDFSvc::Done', function(evt, msg){
+            __hideLoading();
+        });
+
+        $scope.$on('ExcelSvc::Progress', function(evt, msg){
+            __showLoading(msg);
+        });
+        $scope.$on('ExcelSvc::Done', function(evt, msg){
             __hideLoading();
         });
     }
