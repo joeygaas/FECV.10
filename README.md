@@ -24,7 +24,6 @@
    - start inspection wont update the view (fixed)
    - scanner confirmation button also click  other buttons(ionic issue)
    - delete img wont delete img in file sys(fixed)
-   - photo should be save inside the company folder in external data storage(ongoing)
    - photo camera onrientation(fixed)
    - input type file wont work on 4.4 +  (fixed)
 ## TODO
