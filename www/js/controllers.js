@@ -1697,7 +1697,6 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         
         $scope.uploaded = true;
     };
-
 })
 
 

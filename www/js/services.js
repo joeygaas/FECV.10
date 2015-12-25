@@ -725,6 +725,39 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             return deffered.promise;
         }
 
+        /**
+        *@function __completeReportFrmt
+        *@description generate a complete report format about the units
+        */
+        function __completeReportFrmt (data){
+            var deffered = $q.defer();
+            try{
+                // template array
+                var tpl = [
+                            ['model', 'serial_no', 'inspection_date', 'dop', 'expiration_date', 'date_refilled', 'location', 'Hose/Nozzle', 'accessible', 'safety_pin', 'pressure_gauge', 'label', 'corrosion', 'signs']
+                          ];
+
+                for(var i = 0; i < data.length; i++){
+                    // convert object to array 
+                    var value = Object.keys(data[i]).map(function(key){
+                        return data[i][key];
+                    });
+
+                    // store the value into the template
+                    tpl.push(value.splice(0, 2));
+                }
+
+                deffered.resolve(tpl);
+                console.log(tpl);
+
+            } catch(e){
+                alert("__completeReportFrmt " + e);
+                deffered.reject(e);
+            }
+
+            return deffered.promise;
+        }
+
     return {
         /**
         *@function generate
@@ -734,7 +767,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             var deffered = $q.defer();
                 try{
                 // get data from the localStorage
-                //var data = angular.fromJson(localStorage.getItem('report'));
+                var data = angular.fromJson(localStorage.getItem('report'));
                 // get the company name
                 var company = localStorage.getItem('company');
                 //alert(localStorage.getItem('company'));
@@ -742,27 +775,22 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 var docTitle = localStorage.getItem('docTitle');
                 //alert(localStorage.getItem('docTitle'));
 
-                /* original data */
-                var data = [
-                        ['model','serial_no','dob'],
-                        ['HCFC-123', 'SAFWAY000001', '12/12/2015'],
-                        ["foo","bar", "0.3"],
-                        ["baz", "Some text", "qux"]
-                    ];
-
-                var ws_name = "SheetJS";
+                var ws_name = "docTitle";
 
                 // genereate Excel file
-                __showLoading("Generating Excel File...");
-                __generateExcelFile(data, ws_name).then(function(excelBlob){
-                    __showLoading("Saving File...");
+                __showLoading("Preparing data...");
+                __completeReportFrmt(data).then(function(tpl){
+                    __showLoading('Generating Excel File');
+                    return __generateExcelFile(tpl, ws_name);
+                }).then(function(excelBlob){
+                    __showLoading('Saving File...');
                     return __saveFile(excelBlob, docTitle, company);
                 }).then(function(success){
                     __hideLoading();
                     deffered.resolve(success);
                 }, function(error){
                     __hideLoading();
-                    alert("saveFile " + error);
+                    alert("savFile " + error);
                     deffered.reject(error);
                 });
             } catch(e){

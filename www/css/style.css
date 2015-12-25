@@ -53,7 +53,7 @@ a {
   margin-top: 30%;
 }
 .text-center {
-  float: right;
+  text-align: center;
 }
 
 /* element padding */
@@ -66,3 +66,7 @@ a {
 }
 
 /* Custom icons */
+.img-sm {
+  width: 100px;
+  height: 100px;
+}
