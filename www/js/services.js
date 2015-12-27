@@ -143,15 +143,10 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
         create : function(unitObj){
             var deffered = $q.defer();
             
-            /*
-            if(unitObj.date_refilled){
-                var date_refilled = $filter('date')(unitObj.date_refilled, 'MM/dd/yy');
-            }
-            */
-            var date_refilled = (unitObj.date_refilled == undefined) ? 'n/a' : $filter('date')(unitObj.date_refilled, 'MM/dd/yy');
+            var date_refilled = (unitObj.date_refilled == undefined) ? 'n/a' : $filter('date')(unitObj.date_refilled, 'yyyy/MM/dd');
 
-            var dop = $filter('date')(unitObj.dop, 'MM/dd/yy');
-            var expiration_date = $filter('date')(unitObj.expiration_date, 'MM/dd/yy');
+            var dop = $filter('date')(unitObj.dop, 'yyyy/MM/dd');
+            var expiration_date = $filter('date')(unitObj.expiration_date, 'yyyy/MM/dd');
 
             var params = [];
             params[0] = unitObj.serialNo;
@@ -173,6 +168,47 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                     deffered.reject(error);
                 });
             });
+            return deffered.promise;
+        },
+
+        // fromFile
+        fromFile : function(unitObj){
+            var deffered = $q.defer();
+
+            try{
+
+            if(unitObj.date_refilled == undefined){
+                var date_refilled = 'n/a';
+            }else {
+                var date_refilled = $filter('MMddyyToyyyyMMdd')(unitObj.date_refilled);
+            }
+
+            var expiration_date = $filter('MMddyyToyyyyMMdd')(unitObj.expiration_date);
+            var dop = $filter('MMddyyToyyyyMMdd')(unitObj.dop);
+
+            var params = [];
+            params[0] = unitObj.serialNo;
+            params[1] = unitObj.model;
+            params[2] = unitObj.companyId;
+            params[3] = unitObj.location;
+            params[4] = dop;
+            params[5] = date_refilled;
+            params[6] = expiration_date;
+
+            // TODO :: add more data here
+
+            $ionicPlatform.ready(function(){
+                var query = "INSERT INTO units(serial_no, model, company_id, location, dop, date_refilled, expiration_date) VALUES(?, ?, ?, ?, ?, ?, ?)";
+                $cordovaSQLite.execute(db, query, params)
+                .then(function(res){
+                    deffered.resolve(res);
+                }, function(error){
+                    deffered.reject(error);
+                });
+            });
+            } catch(e){
+                alert("fromFile " + e);
+            }
             return deffered.promise;
         },
 

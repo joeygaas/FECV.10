@@ -754,8 +754,22 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         var date = dateToday.getDate();
         var year = dateToday.getFullYear();
 
-        var tmpDate = (month + 4) + '/' + date + '/' + year.toString().substr(2,2);
-        var actualDate = (month + 1) + '/' + date + '/' + year.toString().substr(2,2);
+        // check if the month toda + 3 exceds 12
+        if( (month + 3) > 12 ){
+            var tmpYear = year + 1;
+            var tmpMonth = '0' + ((month + 3) - 12);  
+        } 
+
+        // add leading zeroes to month and date
+        if(month < 10 ){
+            month = '0' + month;
+        }
+        if(date < 10){
+            date = '0' + date;
+        }
+
+        var tmpDate = tmpYear + '/' + tmpMonth + '/' + date;
+        var actualDate = year + '/' + month + '/' + date; 
 
         var nearExpire = "SELECT * FROM units WHERE company_id = ?";
 
@@ -769,7 +783,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
             for(var i = 0; i < data.length; i++){
                 var expireDate = Number(data[i].expiration_date.split('/').join(''));
                 
-                if( testDate > expireDate && (expireDate - actDate) > 0 ){
+                if( testDate > expireDate && data[i].expired != 'yes' ){
                     newData.push(data[i]);
                 }
             }
@@ -807,7 +821,16 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         var month = dateToday.getMonth()+1;
         var date = dateToday.getDate();
         var year = dateToday.getFullYear();
-        var actualDate = month + '/' + date + '/' + year.toString().substr(2,2);
+
+        if(date < 10){
+            date = '0' + date;
+        }
+
+        if(month < 10){
+            month = '0' + month;
+        }
+
+        var actualDate = year + '/' + month + date;
 
         var query = "SELECT * FROM units WHERE company_id = ?";
         // Get the unit data
@@ -962,7 +985,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         // Set the inspection data
         var query1 = "UPDATE companies SET inspect_date = ?, start = 1 WHERE id = ?";
         var param = [];
-        param[0] = month + '/' + date + '/' + year;
+        param[0] = year + '/' + month + '/' + date;
         param[1] = id;
 
         var confirmation = $ionicPopup.confirm({
@@ -1390,16 +1413,16 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         params[0] = (unitObj.company_id.id == undefined) ? $stateParams.companyId : unitObj.company_id.id;
         params[1] = unitObj.model;
         params[2] = unitObj.location;
-        params[3] = $filter('date')(unitObj.dop, 'MM/dd/yy');
-        params[4] = $filter('date')(unitObj.date_refilled, 'MM/dd/yy');
-        params[5] = $filter('date')(unitObj.expiration_date, 'MM/dd/yy');
+        params[3] = $filter('date')(unitObj.dop, 'yyyy/MM/dd');
+        params[4] = $filter('date')(unitObj.date_refilled, 'yyyy/MM/dd');
+        params[5] = $filter('date')(unitObj.expiration_date, 'yyyy/MM/dd');
 
         // check if the unit is expired
         var dateToday = new Date();
         var month = dateToday.getMonth()+1;
         var date = dateToday.getDate();
         var year = dateToday.getFullYear();
-        var actualDate = month + '/' + date + '/' + year.toString().substr(2,2);
+        var actualDate = month + '/' + date + '/' + year;
         actualDate = actualDate.split('/').join('');
 
         var expireDate = Number(params[5].split('/').join(''));
@@ -1834,7 +1857,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                     // hide the notification image after 3 seconds
                     $timeout(function(){
                         $scope.uploaded = false;
-                    }, 3000);
+                    }, 300);
                 });
             });
     };
@@ -1849,7 +1872,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
             // set the units company id to the current company
             data[i].companyId = $stateParams.companyId;
 
-            UnitSvc.create(data[i]);
+            UnitSvc.fromFile(data[i]);
         }
         
         $scope.uploaded = true;

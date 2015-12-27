@@ -16,4 +16,29 @@ angular.module('fireExMonitor.filters', ['ionic', 'ngCordova'])
 		}
 		return output;
 	}
+})
+
+/**
+*@filter sqlresultToArrayObj
+*@description generate array of objects
+*/
+.filter('MMddyyToyyyyMMdd', function(){
+	return function(input){
+		var output;
+
+		if(input != ''){
+			// Do the filtering
+			var splitDateR = input.split('/');
+            var dateRarray = [];
+
+            // modify the splited arrays
+            dateRarray.push('20' + splitDateR[2]);
+            dateRarray.push(splitDateR[0]);
+            dateRarray.push(splitDateR[1]);
+
+            var output = dateRarray.join('/');
+		}
+
+		return output;
+	}
 });
