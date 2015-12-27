@@ -20,8 +20,15 @@
          <div class="item">
             <p>Location : {{unit.location}}</p>
             <p>Inspection Date : {{unit.inspection_date}}</p>
-            <p>Overal Status : <span ng-show="unit.status == 'operational'" class="positive">Operational</span>
-            <span ng-show="unit.status == 'deffective'" class="assertive">Deffective</span></p>
+            <p>
+              Physical Condition : 
+              <span ng-show="unit.status == 'operational'" class="positive">Operational</span>
+              <span ng-show="unit.status == 'deffective'" class="assertive">Defective</span>
+            </p>
+            <p>Expired : 
+              <span ng-show="unit.expired == 'yes'" class="assertive">Yes</span>
+              <span ng-show="unit.expired == 'no'" class="positive">No</span>
+            </p>
             <br />
             <p>Date Aquired : {{unit.dop}}</p>
             <p>Date Refilled : {{unit.date_refilled}}</p>

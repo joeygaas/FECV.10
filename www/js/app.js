@@ -34,7 +34,7 @@ angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMo
     $cordovaSQLite.execute(db,
     "CREATE TABLE IF NOT EXISTS companies(id integer primary key, name text unique, person text, contact_no int, inspect_date text, start boolean)");
     $cordovaSQLite.execute(db,
-    "CREATE TABLE IF NOT EXISTS units(id integer primary key, company_id integer, model text, serial_no text unique, inspection_date default 'New', dop text default 'n/a', expiration_date text default 'n/a', date_refilled text default 'n/a', location text default 'n/a', checklist1 text default 'passed', checklist2 text default 'passed', checklist3 text default 'passed', checklist4 text default 'passed', checklist5 text default 'passed', checklist6 text default 'passed', checklist7 text default 'passed', checklist8 text default 'passed', status text default 'operational', missing text default 'no')");
+    "CREATE TABLE IF NOT EXISTS units(id integer primary key, company_id integer, model text, serial_no text unique, inspection_date default 'New', dop text default 'n/a', expiration_date text default 'n/a', date_refilled text default 'n/a', location text default 'n/a', checklist1 text default 'passed', checklist2 text default 'passed', checklist3 text default 'passed', checklist4 text default 'passed', checklist5 text default 'passed', checklist6 text default 'passed', checklist7 text default 'passed', checklist8 text default 'passed', status text default 'operational', missing text default 'no', expired text default 'no')");
     $cordovaSQLite.execute(db, 
     "CREATE TABLE IF NOT EXISTS photos(id integer primary key, unit_serial text, description text, imgURI text, date_taken text)");  
   });

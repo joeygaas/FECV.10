@@ -17,22 +17,37 @@
              Total Units
              <span class="badge badge-positive">{{ summary.totalUnits }}</span>
            </a>
+
            <a class="item" ng-click="displayGoodUnits()">
              Passed
              <span class="badge badge-positive">{{ summary.good }}</span>
            </a>
+
            <a class="item" ng-click="displayDeffectiveUnits()">
              Failed
              <span class="badge badge-assertive">{{ summary.deffective }}</span>
            </a>
+
            <a class="item" ng-click="displayNotInspected()">
              Not Inspected
              <span class="badge badge-assertive">{{ summary.notInspectedUnits }}</span>
            </a>
+
            <a class="item" ng-click="displayMissingUnits()">
              Missing Units
              <span class="badge badge-assertive">{{ summary.missingUnits }}</span>
            </a>
+
+           <a class="item" ng-click="displayNearExpire()">
+             Near expiration
+             <span class="badge badge-assertive">{{ summary.nearExpire}}</span>
+           </a>
+
+           <a class="item" ng-click="displayExpired()">
+             Expired
+             <span class="badge badge-assertive">{{ summary.expired }}</span>
+           </a>
+
          </div>
 
          <div class="list card">

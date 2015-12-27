@@ -177,12 +177,12 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
         },
 
         // Read
-        read : function(id){
+        read : function(serial_no){
             var deffered = $q.defer();
 
             $ionicPlatform.ready(function(){
                 var query = "SELECT * FROM units WHERE serial_no = ?";
-                $cordovaSQLite.execute(db, query, [id]).then(function(res){
+                $cordovaSQLite.execute(db, query, [serial_no]).then(function(res){
                     if(res.rows.length != 0){
                         deffered.resolve(res.rows.item(0));
                     }else {
