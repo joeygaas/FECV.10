@@ -39,7 +39,8 @@ function($scope, $location, $ionicPlatform, $ionicModal, $cordovaBarcodeScanner,
     */
     $scope.scanUnit = function(name, company_id){
 
-        // Ask for confiramtion 
+        // Ask for confirmation using ionic popup
+        /* 
         var scanConfirm = $ionicPopup.confirm({
             title: 'Scan Qr code.',
             template: 'Please position your camera now.'
@@ -63,9 +64,44 @@ function($scope, $location, $ionicPlatform, $ionicModal, $cordovaBarcodeScanner,
                         template : 'An error occured ->' + error
                     });
                     alertPopup;
-        });
+                 });
             }
         });
+        */
+        try {
+        // Ask for confirmation using native dialog
+        $ionicPlatform.ready(function(){
+            navigator.notification.confirm("Position your camera now.", function(buttonIndex){
+                switch(buttonIndex){
+                    case 1 :
+                            // Scan the barcode
+                            $cordovaBarcodeScanner.scan().then(function(imageData) {
+                                if(!imageData.cancelled){
+                                    // TODO : add QR code data filtering
+                                    $location.path('app/unitRecords/' + imageData.text + '/' + name + '/' + company_id);
+                                }else {
+                                   var alertPopup = $ionicPopup.alert({
+                                    title : 'Scann cancelled'
+                                });
+                                alertPopup;
+                                }
+                            }, function(error) {
+                                var alertPopup = $ionicPopup.alert({
+                                    title : 'Scanner Error',
+                                    template : 'An error occured ->' + error
+                                });
+                                alertPopup;
+                             });
+                            break;
+                        case 2 :
+                            break;
+                    }   
+            }, "Start Scanner", ["Yes", "No"]);
+        });
+        }
+        catch(e){
+            alert(e);
+        }
     };
 
     /**
