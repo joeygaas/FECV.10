@@ -22,7 +22,7 @@
 
 ## FECV1.0 BUGS
    - start inspection wont update the view (fixed)
-   - scanner confirmation button also click  other buttons(ionic issue)
+   - scanner confirmation button also click  other buttons (fixed)
    - delete img wont delete img in file sys(fixed)
    - photo camera onrientation(fixed)
    - input type file wont work on 4.4 +  (fixed)
