@@ -349,7 +349,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
             // get the inpection date of the units
             for(var i = 0; i < res.rows.length; i++){
                 // split the date
-                if(res.rows.item(i).inspection_date != ''){
+                if(res.rows.item(i).inspection_date != 'n/a'){
                     var date = res.rows.item(i).inspection_date.split('/');
                     // last inspection date of the unit summary
                     var inspectDate = $scope.summary.lastInspect.split('/');
@@ -761,15 +761,11 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         } 
 
         // add leading zeroes to month and date
-        if(month < 10 ){
-            month = '0' + month;
-        }
-        if(date < 10){
-            date = '0' + date;
-        }
+        date = $filter('addLeadingZero')(date);
+        month = $filter('addLeadingZero')(month);
 
         var tmpDate = tmpYear + '/' + tmpMonth + '/' + date;
-        var actualDate = year + '/' + month + '/' + date; 
+        var actualDate = year + '/' + month + '/' + date;
 
         var nearExpire = "SELECT * FROM units WHERE company_id = ?";
 
@@ -822,13 +818,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         var date = dateToday.getDate();
         var year = dateToday.getFullYear();
 
-        if(date < 10){
-            date = '0' + date;
-        }
-
-        if(month < 10){
-            month = '0' + month;
-        }
+        date = $filter('addLeadingZero')(date);
+        month = $filter('addLeadingZero')(month);
 
         var actualDate = year + '/' + month + date;
 
@@ -895,10 +886,6 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         $scope.summary = {};
         // Show loading
         $scope.showLoading();
-        // Get the expired units
-        $scope.getExpired().then(function(res){
-            $scope.summary.expired = res.length;
-        });
 
         // Get the company last inspection data
         CompanySvc.read($stateParams.id).then(function(res){
@@ -925,6 +912,11 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         // Get the units that will expire after 3 months
         $scope.getNearExpire().then(function(res){
             $scope.summary.nearExpire = res.length;
+        });
+
+        // Get the expired units
+        $scope.getExpired().then(function(res){
+            $scope.summary.expired = res.length;
         });
 
         // Get the units that is not inspected
@@ -1137,7 +1129,14 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 *@controller UnitListCtrl
 *@description unit controller
 */
-.controller('UnitsListCtrl', function($scope, $stateParams, $ionicPopover, UnitSvc){
+.controller('UnitsListCtrl', function(
+    $scope, 
+    $stateParams, 
+    $ionicPopover, 
+    $ionicPopup,
+    $location,
+    UnitSvc
+){
     /** 
     *@process 
     *@description Create a pop-over 
@@ -1208,6 +1207,31 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     }
 
     /**
+    *@function deleteRecords
+    *@description delete all the records in the list
+    */
+    $scope.deleteAll = function(location){
+        var query = "DELETE FROM units WHERE location = ? AND company_id = ?";
+
+        // ask for confirmation to the user
+        var confirmation = $ionicPopup.confirm({
+            title : 'Delete Records',
+            template : 'You will lost all the data permanently. Do you want to proceed?'
+        }).then(function(res){
+            if(res){
+                 UnitSvc.query(query, [$stateParams.location, $stateParams.id]).then(function(res){
+                    var alertPopup = $ionicPopup.alert({
+                        title : 'Data has been deleted.'
+                    });
+                    alertPopup;
+                    // redirect the user
+                    $location.path('/app/locations/' + $stateParams.id + '/' + $stateParams.name);
+                 });
+            }
+        });  
+    }
+
+    /**
     *@process 
     *@description This process will run every time when this page is loaded
     */
@@ -1231,6 +1255,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $ionicPopover, 
     $ionicPlatform, 
     $cordovaCamera,
+    $ionicHistory,
+    $location,
     UnitSvc, 
     CompanySvc,
     PhotoSvc
@@ -1536,7 +1562,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
             });
             $scope.hideModal(1);
             alertPopup;
-            window.history.back();
+            $scope.viewUnit(unitObj.serialNo);
         });
     }
 
@@ -1584,10 +1610,10 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
             title : 'Delete Records',
             template : 'Do you want to delete this records permanently?'
         }).then(function(res){
-            console.log(id);
             if(res){
                 // Delete the uni records
                 UnitSvc.delete(id).then(function(res){
+                    $location.path($ionicHistory.backView().url); // Redirect to the last viewed page
                     // notify the user and redirect to units list
                     var alertPopup = $ionicPopup.alert({
                         title : 'Records has been successfuly deleted.'
@@ -1595,8 +1621,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
                     alertPopup;
 
                     // Hide popover
-                    $scope.hidePopover();
-                    window.history.back(); // Redirect to the last viewed page
+                   $scope.closePopover();
                 });
             }
         });

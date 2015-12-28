@@ -19,8 +19,8 @@ angular.module('fireExMonitor.filters', ['ionic', 'ngCordova'])
 })
 
 /**
-*@filter sqlresultToArrayObj
-*@description generate array of objects
+*@filter MMddyyToyyyyMMdd
+*@description convert date fomr MM/dd/yy to yyyy/MM/dd
 */
 .filter('MMddyyToyyyyMMdd', function(){
 	return function(input){
@@ -37,6 +37,24 @@ angular.module('fireExMonitor.filters', ['ionic', 'ngCordova'])
             dateRarray.push(splitDateR[1]);
 
             var output = dateRarray.join('/');
+		}
+
+		return output;
+	}
+})
+
+/**
+*@filter addLeadingZero
+*@description add a leading zero to date
+*/
+.filter('addLeadingZero', function(){
+	return function(input){
+		var output;
+		
+		if(input < 10){
+			output = '0' + input;
+		}else{
+			output = input;
 		}
 
 		return output;

@@ -157,10 +157,20 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             params[5] = date_refilled;
             params[6] = expiration_date;
 
-            // TODO :: add more data here
+            // check if the unit is expired
+            var dateToday = new Date();
+            dateToday = $filter('date')(dateToday, 'yyyy/MM/dd');
+
+            if( Number(dateToday.split('/').join('')) > Number(expiration_date.split('/').join('')) ){
+                params[7] = 'yes';
+            } else {
+                params[7] = 'no';
+            }
+
+            console.log(params);
 
             $ionicPlatform.ready(function(){
-                var query = "INSERT INTO units(serial_no, model, company_id, location, dop, date_refilled, expiration_date) VALUES(?, ?, ?, ?, ?, ?, ?)";
+                var query = "INSERT INTO units(serial_no, model, company_id, location, dop, date_refilled, expiration_date, expired) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
                 $cordovaSQLite.execute(db, query, params)
                 .then(function(res){
                     deffered.resolve(res);
