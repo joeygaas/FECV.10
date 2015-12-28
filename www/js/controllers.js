@@ -395,7 +395,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getGoodUnits = function(){
         var deffered = $q.defer();
-        var goodUnits = "SELECT * FROM units WHERE company_id = ? AND status = 'operational'";
+        var goodUnits = "SELECT * FROM units WHERE company_id = ? AND status = 'operational' AND expired = 'no'";
 
         UnitSvc.query(goodUnits, [$stateParams.id]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
