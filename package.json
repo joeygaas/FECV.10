@@ -33,7 +33,12 @@
       "locator": "http://github.com/don/cordova-filechooser.git",
       "id": "com.megster.cordova.FileChooser"
     },
-    "org.apache.cordova.dialogs"
+    "org.apache.cordova.dialogs",
+    "cordova-plugin-websocket-server",
+    {
+      "locator": "https://github.com/floatinghotpot/cordova-httpd.git",
+      "id": "com.rjfun.cordova.httpd"
+    }
   ],
   "cordovaPlatforms": [
     "android"

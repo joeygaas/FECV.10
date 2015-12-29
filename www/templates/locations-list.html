@@ -1,6 +1,7 @@
 <ion-view view-title={{companyName}}>
 	<ion-nav-buttons side="right">
-		<button ng-click="openPopover($event)" class="button icon ion-android-more-vertical button-clear"></button>
+    <button ng-click="scanUnit(companyName, companyId)" class="button icon ion-qr-scanner"></button>
+    <a ng-href="#/app/search" class="button icon ion-android-search"></a>
 	</ion-nav-buttons>
 	<ion-content has-bouncing="true">
 		 <!-- Unit locations page -->
@@ -15,25 +16,3 @@
 	</ion-content>
   </div>
 </ion-view>
-
-<!-- Menu popover -->
-<script id="menu-popover.html" type="text/ng-template">
-  <ion-popover-view>
-    <ion-content>
-        <div class="list">
-          <a class="item item-icon-left" ng-click="scanUnit(companyName, companyId); closePopover()">
-              <i class=" icon ion-qr-scanner"></i>
-              Scan Unit
-          </a>
-          <a class="item item-icon-left" ng-href="#/app/search" ng-click="closePopover()">
-              <i class=" icon ion-android-search"></i>
-              Search
-          </a>
-          <a class="item item-icon-left" ng-click="closePopover()">
-              <i class="icon ion-android-document"></i>
-              Genrate Report
-          </a>
-        </div>
-    </ion-content>
-  </ion-popover-view>
-</script>

@@ -12,7 +12,7 @@
        <!-- Company Details -->
        <div class="list card" ng-click="detailsForm()">
          <div class="item item-divider">
-            <h2>Company : {{companyName}}</h2>
+            <h2>Company : {{unit.company_name}}</h2>
             <h2>Unit Model : {{unit.model}}</h2>
             <h2>Control No : {{unit.serial_no}}</h2>
          </div>
@@ -185,7 +185,7 @@
 	          <div class="list card">
 	            <div class="item item-divider">
 	              <h2>Company Name : {{companyName}}</h2>
-	              <h2>Unit Serial no : {{add.serialNo}}</h2>
+	              <h2>Unit Serial no : {{add.serial_no}}</h2>
 	            </div>
 
 	            <label class="item item-input item-stacked-label">
@@ -327,7 +327,7 @@
               </div>
               <label class="item item-input item-stacked-label item-select">
                 <span class="input-label">New Company</span>
-                <select ng-model="unit.company_id" ng-options="company as company.name for company in companies track by company.id">
+                <select ng-model="unit.company_name" ng-options="company as company.name for company in companies track by company.name">
                 </select>
               </label>
               <label class="item item-input item-stacked-label">

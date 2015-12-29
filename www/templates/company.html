@@ -125,7 +125,7 @@
                 <i class="icon ion-document"></i>
                 Generate Report
             </a>
-            <a class="item item-icon-left" ng-href="#/app/import/{{companyId}}" ng-click="hidePopover()">
+            <a class="item item-icon-left" ng-href="#/app/import/{{companyName}}" ng-click="hidePopover()">
                 <i class="icon ion-android-folder-open"></i>
                 Import Records
             </a>
@@ -133,7 +133,7 @@
                 <i class="icon ion-android-share-alt"></i>
                 Share Records
             </a>
-            <a class="item item-icon-left" ng-click="deleteAllRecords(companyId)">
+            <a class="item item-icon-left" ng-click="hidePopover(); deleteAllRecords(companyName, companyId)">
                 <i class="icon ion-android-delete"></i>
                 Delete All Records
             </a>

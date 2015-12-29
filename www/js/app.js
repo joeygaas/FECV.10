@@ -5,7 +5,12 @@ var db = null;
 // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
 // the 2nd parameter is an array of 'requires'
 // 'starter.controllers' is found in controllers.js
-angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMonitor.services'])
+angular.module('fireExMonitor', [
+  'ionic', 
+  'fireExMonitor.controllers', 
+  'fireExMonitor.services',
+  'btford.socket-io'
+  ])
 
 .run(function($ionicPlatform, $cordovaSQLite) {
   $ionicPlatform.ready(function() {
@@ -32,9 +37,9 @@ angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMo
     
     // Create tables
     $cordovaSQLite.execute(db,
-    "CREATE TABLE IF NOT EXISTS companies(id integer primary key, name text unique, person text, contact_no int, inspect_date text, start boolean)");
+    "CREATE TABLE IF NOT EXISTS companies(id integer primary key, name text unique, person text default 'n/a', contact_no int default 0, inspect_date text default 'n/a', start boolean default 0)");
     $cordovaSQLite.execute(db,
-    "CREATE TABLE IF NOT EXISTS units(id integer primary key, company_id integer, model text, serial_no text unique, inspection_date default 'New', dop text default 'n/a', expiration_date text default 'n/a', date_refilled text default 'n/a', location text default 'n/a', checklist1 text default 'passed', checklist2 text default 'passed', checklist3 text default 'passed', checklist4 text default 'passed', checklist5 text default 'passed', checklist6 text default 'passed', checklist7 text default 'passed', checklist8 text default 'passed', status text default 'operational', missing text default 'no', expired text default 'no')");
+    "CREATE TABLE IF NOT EXISTS units(id integer primary key, company_name text, model text, serial_no text unique, inspection_date default 'New', dop text default 'n/a', expiration_date text default 'n/a', date_refilled text default 'n/a', location text default 'n/a', checklist1 text default 'passed', checklist2 text default 'passed', checklist3 text default 'passed', checklist4 text default 'passed', checklist5 text default 'passed', checklist6 text default 'passed', checklist7 text default 'passed', checklist8 text default 'passed', status text default 'operational', missing text default 'no', expired text default 'no')");
     $cordovaSQLite.execute(db, 
     "CREATE TABLE IF NOT EXISTS photos(id integer primary key, unit_serial text, description text, imgURI text, date_taken text)");  
   });
@@ -119,7 +124,7 @@ angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMo
   })
 
   .state('app.import', {
-    url: '/import/:companyId',
+    url: '/import/:companyName',
     views : {
       'menuContent' : {
         templateUrl : 'templates/import.html',
@@ -152,7 +157,8 @@ angular.module('fireExMonitor', ['ionic', 'fireExMonitor.controllers', 'fireExMo
     url: '/syncData',
     views: {
         'menuContent': {
-            templateUrl: 'templates/syncData.html'
+            templateUrl: 'templates/syncData.html',
+            controller : 'SyncCtrl'
         }
     }
   })

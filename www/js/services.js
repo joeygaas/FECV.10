@@ -4,7 +4,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
 /**
 *@Service CompanySvc
 */
-.factory('CompanySvc', function($cordovaSQLite, $ionicPlatform, $q){
+.factory('CompanySvc', function($cordovaSQLite, $ionicPlatform, $filter, $q){
     return {
         // All 
         all : function(){
@@ -14,17 +14,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 var query = "SELECT * FROM companies";
                 $cordovaSQLite.execute(db, query, []).then(function(res){
                     // convert the data into object
-                    var newData = [];
-                    
-                    for(var i = 0; i < res.rows.length; i++){
-                        var tmpData = {};
-                        
-                        tmpData.id = res.rows.item(i).id;
-                        tmpData.name = res.rows.item(i).name;
-                        tmpData.inspect_date = res.rows.item(i).inspect_date;
-                        
-                        newData.push(tmpData);
-                    }
+                    var newData = $filter('sqlResultSanitize')(res);
                     
                     deffered.resolve(newData);
                 }, function(error){
@@ -149,9 +139,9 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             var expiration_date = $filter('date')(unitObj.expiration_date, 'yyyy/MM/dd');
 
             var params = [];
-            params[0] = unitObj.serialNo;
+            params[0] = unitObj.serial_no;
             params[1] = unitObj.model;
-            params[2] = unitObj.companyId;
+            params[2] = unitObj.company_name;
             params[3] = unitObj.location;
             params[4] = dop;
             params[5] = date_refilled;
@@ -167,10 +157,18 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 params[7] = 'no';
             }
 
-            console.log(params);
+            // checklist params
+            params[8] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist1;
+            params[9] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist2;
+            params[10] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist3;
+            params[11] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist4;
+            params[12] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist5;
+            params[13] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist6;
+            params[14] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist7;
+            params[15] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist8;
 
             $ionicPlatform.ready(function(){
-                var query = "INSERT INTO units(serial_no, model, company_id, location, dop, date_refilled, expiration_date, expired) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+                var query = "INSERT INTO units(serial_no, model, company_name, location, dop, date_refilled, expiration_date, expired, checklist1, checklist2, checklist3, checklist4, checklist5, checklist6, checklist7, checklist8) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $cordovaSQLite.execute(db, query, params)
                 .then(function(res){
                     deffered.resolve(res);
@@ -180,6 +178,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             });
             return deffered.promise;
         },
+
 
         // fromFile
         fromFile : function(unitObj){
@@ -197,18 +196,37 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             var dop = $filter('MMddyyToyyyyMMdd')(unitObj.dop);
 
             var params = [];
-            params[0] = unitObj.serialNo;
+            params[0] = unitObj.serial_no;
             params[1] = unitObj.model;
-            params[2] = unitObj.companyId;
+            params[2] = unitObj.company_name;
             params[3] = unitObj.location;
             params[4] = dop;
             params[5] = date_refilled;
             params[6] = expiration_date;
 
-            // TODO :: add more data here
+            // check if the unit is expired
+            var dateToday = new Date();
+            dateToday = $filter('date')(dateToday, 'yyyy/MM/dd');
+
+            if( Number(dateToday.split('/').join('')) > Number(expiration_date.split('/').join('')) ){
+                params[7] = 'yes';
+            } else {
+                params[7] = 'no';
+            }
+
+            // checklist params
+            params[8] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist1;
+            params[9] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist2;
+            params[10] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist3;
+            params[11] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist4;
+            params[12] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist5;
+            params[13] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist6;
+            params[14] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist7;
+            params[15] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist8;
+
 
             $ionicPlatform.ready(function(){
-                var query = "INSERT INTO units(serial_no, model, company_id, location, dop, date_refilled, expiration_date) VALUES(?, ?, ?, ?, ?, ?, ?)";
+                var query = "INSERT INTO units(serial_no, model, company_name, location, dop, date_refilled, expiration_date, expired, checklist1, checklist2, checklist3, checklist4, checklist5, checklist6, checklist7, checklist8) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                 $cordovaSQLite.execute(db, query, params)
                 .then(function(res){
                     deffered.resolve(res);
@@ -242,19 +260,66 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             return deffered.promise;
         },
 
-        // Delete
-        delete : function(id){
+        // Update the units records
+        update : function(data){
             var deffered = $q.defer();
 
-            $ionicPlatform.ready(function(){
-                var query = "DELETE FROM units WHERE id = ?";
-                $cordovaSQLite.execute(db, query, [id]).then(function(res){
-                    deffered.resolve(res);
-                }, function(error){
-                    alert("Error: " + error);
-                    deffered.reject(error);
+            try{
+
+                if(unitObj.date_refilled == undefined){
+                    var date_refilled = 'n/a';
+                }else {
+                    var date_refilled = $filter('MMddyyToyyyyMMdd')(unitObj.date_refilled);
+                }
+
+                var expiration_date = $filter('MMddyyToyyyyMMdd')(unitObj.expiration_date);
+                var dop = $filter('MMddyyToyyyyMMdd')(unitObj.dop);
+
+                var params = [];
+                params[0] = unitObj.serial_no;
+                params[1] = unitObj.model;
+                params[2] = unitObj.company_name;
+                params[3] = unitObj.location;
+                params[4] = dop;
+                params[5] = date_refilled;
+                params[6] = expiration_date;
+
+                // check if the unit is expired
+                var dateToday = new Date();
+                dateToday = $filter('date')(dateToday, 'yyyy/MM/dd');
+
+                if( Number(dateToday.split('/').join('')) > Number(expiration_date.split('/').join('')) ){
+                    params[7] = 'yes';
+                } else {
+                    params[7] = 'no';
+                }
+
+                // checklist params
+                params[8] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist1;
+                params[9] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist2;
+                params[10] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist3;
+                params[11] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist4;
+                params[12] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist5;
+                params[13] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist6;
+                params[14] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist7;
+                params[15] = (unitObj.checklist1 == undefined) ? 'passed' : unitObj.checklist8;
+
+                params[16] = unitObj.serial_no;
+
+                var query = "UPDATE units SET model = ?, company_name = ?, location = ?, dop = ?, date_refilled = ?, expiration_date = ?, expired = ?, checklist1 = ?, checklist2 = ?, checklist3 = ?, checklist4 = ?, checklist5 = ?, checklist6 = ?, checklist7 = ?, checklist8 = ? WHERE serial_no = ?";
+                $ionicPlatform.ready(function(){
+                    $cordovaSQLite.execute(db, query, params).then(function(res){
+                        deffered.resolve(res);
+                    }, function(error){
+                        deffered.reject(error);
+                        alert("Update " + error);
+                    });
                 });
-            });
+            } catch(e){
+                alert("Update " + e);
+                deffered.reject(e);
+            }
+
             return deffered.promise;
         },
 
@@ -271,7 +336,23 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 });
             });
             return deffered.promise;
-        }
+        },
+
+        // Delete
+        delete : function(id){
+            var deffered = $q.defer();
+
+            $ionicPlatform.ready(function(){
+                var query = "DELETE FROM units WHERE id = ?";
+                $cordovaSQLite.execute(db, query, [id]).then(function(res){
+                    deffered.resolve(res);
+                }, function(error){
+                    alert("Error: " + error);
+                    deffered.reject(error);
+                });
+            });
+            return deffered.promise;
+        },
     }
 })
 
@@ -570,7 +651,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             var deffered = $q.defer();
             try {
                 $ionicPlatform.ready(function(){
-                    $cordovaFile.removeDir(cordova.file.externalDataDirectorypathPath, dirPath).then(function(success){
+                    $cordovaFile.removeDir(cordova.file.externalDataDirectory, dirPath).then(function(success){
                         deffered.resolve(success);
                     }, function(error){
                         alert("removeDirExternal " + error.code);
@@ -706,6 +787,67 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 alert("__generate " + e);
                 deffered.reject(e);
             }
+
+            return deffered.promise;
+        }
+
+        /**
+        *@function __saveSync
+        *@description save the file inthe application external data directory
+        */
+        function __saveSync(excelBlob, fileName, company) {
+            var deffered = $q.defer();
+            $ionicPlatform.ready(function(){
+                try {
+
+                    // split and join the fileName string
+                    // to generate a valid file name and dir
+                    var file = fileName.split(' ').join('') + '.xlsx';
+                    var dir = company.split(' ').join('');
+
+                    // Check the dir if it exist before saving the data
+                    // if dir don't exist create it and save the data
+                    $cordovaFile.checkDir(cordova.file.externalDataDirectory, dir).then(function(success){
+                        // write the file using ngCordova file api
+                        $cordovaFile.writeFile(cordova.file.externalDataDirectory + dir, file, excelBlob, {'append' : false})
+                        .then(function(success){
+                            deffered.resolve(success);
+
+                        }, function(e){
+                            deffered.reject(e);
+                            alert("__saveFile WriteFile1 " + e.code)
+
+                        });
+                    }, function(error){
+                        if(error.code == 1){
+                            // Create the missing dir
+                            $cordovaFile.createDir(cordova.file.externalDataDirectory, dir).then(function(success){
+                                // Write the file
+                                $cordovaFile.writeFile(cordova.file.externalDataDirectory + dir, file, excelBlob, {'append' : false})
+                                .then(function(success){
+                                    deffered.resolve(success);
+
+                                }, function(e){
+                                    deffered.reject(e);
+                                    alert("__saveFile WriteFile1 " + e.code);
+                                });
+
+                            }, function(error){
+                                deffered.reject(error);
+                                alert("__saveFile CreateDir " + error.code);
+                            });
+                        }
+                        else {
+                            deffered.reject(error);
+                            alert("__saveFile CheckDir " + error.code);
+                        }
+                    });
+
+                } catch(e){
+                    deffered.reject(e);
+                    alert("__saveFile " + e);
+                }
+            });
 
             return deffered.promise;
         }
@@ -850,7 +992,9 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                             "Total Units", 
                             "Operational", 
                             "Deffective", 
-                            "Missing Units", 
+                            "Missing Units",
+                            "Near Expiration",
+                            "Expired", 
                             "Not Inspected", 
                             "deffective Discharge hose nozzle", 
                             "Not Easily accessible", 
@@ -868,6 +1012,8 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 value.push(data.good);
                 value.push(data.deffective);
                 value.push(data.missingUnits);
+                value.push(data.newExpire);
+                value.push(data.expired);
                 value.push(data.notInspectedUnits);
                 value.push(data.checklist1Total);
                 value.push(data.checklist2Total);
@@ -888,6 +1034,112 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
             return deffered.promise;
         }
 
+        /**
+        *@function __syncFormatUnits
+        *@description generate a summary report format about the company
+        */
+        function __syncFormatUnits(data){
+            var deffered = $q.defer();
+
+             try{
+                // Summary template
+                var tpl = [
+                            ["company_name",
+                            "model", 
+                            "serial_no", 
+                            "inspection_date", 
+                            "dop",
+                            "expiration_date",
+                            "date_refilled", 
+                            "location", 
+                            "checklist1", 
+                            "checklist2", 
+                            "checklist3", 
+                            "checklist4",
+                            "checklist5",
+                            "checklist6",
+                            "checklist7",
+                            "checklist8",
+                            "status",
+                            "missing",
+                            "expired"]
+                          ];
+
+                for(var i =0; i < data.length; i++){
+                    var value = [];
+
+                    value.push(data[i].company_name);
+                    value.push(data[i].model);
+                    value.push(data[i].serial_no);
+                    value.push(data[i].inspection_date);
+                    value.push(data[i].dop);
+                    value.push(data[i].expiration_date);
+                    value.push(data[i].date_refilled);
+                    value.push(data[i].location);
+                    value.push(data[i].checklist1);
+                    value.push(data[i].checklist2);
+                    value.push(data[i].checklist3);
+                    value.push(data[i].checklist4);
+                    value.push(data[i].checklist5);
+                    value.push(data[i].checklist6);
+                    value.push(data[i].checklist7);
+                    value.push(data[i].checklist8);
+                    value.push(data[i].status);
+                    value.push(data[i].missing);
+                    value.push(data[i].expired);
+
+                    tpl.push(value);
+                }
+                deffered.resolve(tpl);
+
+            } catch(e){
+                alert("__summaryReportFrmt " + e);
+                deffered.reject(e);
+            }
+
+            return deffered.promise;
+        }
+
+        /**
+        *@function __syncFormatCompanies
+        *@description generate sync data for companies
+        */
+        function __syncFormatCompanies(data){
+            var deffered = $q.defer();
+
+            try{
+                var tpl = [
+                            ["id",
+                            "name",
+                            "person",
+                            "contact_no",
+                            "inspect_date",
+                            "start"]
+                          ];
+
+                for(var i = 0; i < data.length; i++){
+                    var value = [];
+
+                    value.push(data[i].id);
+                    value.push(data[i].name);
+                    value.push(data[i].person);
+                    value.push(data[i].contact_no);
+                    value.push(data[i].inspect_date);
+                    value.push(data[i].start);
+
+                    tpl.push(value);
+                }
+
+                deffered.resolve(tpl);
+
+            } catch(e){
+                alert("__syncFormatCompanies " + e);
+                deffered.reject(e);
+            }
+
+            return deffered.promise;
+        }
+
     return {
         /**
         *@function generate
@@ -905,7 +1157,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 var docTitle = localStorage.getItem('docTitle');
                 //alert(localStorage.getItem('docTitle'));
 
-                var ws_name = "docTitle";
+                var ws_name = docTitle;
 
                 if(angular.isArray(data)){
                     // generate a complete report format
@@ -947,6 +1199,72 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 deffered.reject(e);
             }
 
+            return deffered.promise;
+        },
+
+        /**
+        *@function genForSycnUnits
+        *@description generate data for synchronizing with other dive
+        */
+        genForSycnUnits : function(data){
+            var deffered = $q.defer()
+            try{
+                var ws_name = 'SyncDataUnits';
+
+                // generate a summary report format
+                __showLoading('Preparing data...');
+                __syncFormatUnits(data).then(function(tpl){
+                    __showLoading('Generating Excel File');
+                    return __generateExcelFile(tpl, ws_name);
+                }).then(function(excelBlob){
+                    __showLoading('Saving units data...');
+                    return __saveSync(excelBlob, 'SyncDataUnits', 'Backup');
+                }).then(function(success){
+                    __hideLoading();
+                    deffered.resolve(success);
+                }, function(error){
+                    __hideLoading();
+                    alert("saveFile " + error);
+                    deffered.reject(error);
+                });
+
+            } catch(e){
+                alert("generate " + e);
+                deffered.reject(e);
+            }
+            return deffered.promise;
+        },
+
+        /**
+        *@function genForSycnCompnies
+        *@description generate data for synchronizing with other dive
+        */
+        genForSycnCompanies : function(data){
+            var deffered = $q.defer()
+            try{
+                var ws_name = 'SyncDataCompanies';
+
+                // generate a summary report format
+                __showLoading('Preparing data...');
+                __syncFormatCompanies(data).then(function(tpl){
+                    __showLoading('Generating Excel File');
+                    return __generateExcelFile(tpl, ws_name);
+                }).then(function(excelBlob){
+                    __showLoading('Saving companies data...');
+                    return __saveSync(excelBlob, 'SyncDataCompanies', 'Backup');
+                }).then(function(success){
+                    __hideLoading();
+                    deffered.resolve(success);
+                }, function(error){
+                    __hideLoading();
+                    alert("saveFile " + error);
+                    deffered.reject(error);
+                });
+
+            } catch(e){
+                alert("generate " + e);
+                deffered.reject(e);
+            }
             return deffered.promise;
         },
 
@@ -1258,6 +1576,8 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                 var good = data.good.toString();
                 var notInspectedUnits = (data.notInspectedUnits == null) ? '0' : data.notInspectedUnits.toString();
                 var missingUnits = data.missingUnits.toString();
+                var nearExpire = data.nearExpire.toString();
+                var expired = data.expired.toString();
 
                 // checklist summary report
                 var checklist1Total = data.checklist1Total.toString();
@@ -1310,7 +1630,9 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                                     [{text : 'Passed', style :'rows'}, {text: good, style : 'value'}],
                                     [{text : 'Failed', style : 'rows'}, {text: deffective, style : 'value'}],
                                     [{text : 'Not Inspected', style: 'rows'}, {text: notInspectedUnits, style : 'value'}],
-                                    [{text : 'Missing Units', style: 'rows'}, {text: missingUnits, style : 'value'}]
+                                    [{text : 'Missing Units', style: 'rows'}, {text: missingUnits, style : 'value'}],
+                                    [{text : 'Near Expiration', style : 'rows'}, {text: nearExpire, style : 'value'}],
+                                    [{text : 'Expired', style : 'rows'}, {text: expired, style: 'value'}]
                                 ]
                             }
                         },

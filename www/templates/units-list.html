@@ -29,11 +29,7 @@
               <i class=" icon ion-android-search"></i>
               Search
           </a>
-          <a class="item item-icon-left" ng-click="closePopover(); takePicture(unit.serial_no)">
-              <i class=" icon ion-camera"></i>
-              Camera
-          </a>
-          <a class="item item-icon-left" ng-click="closePopover()">
+          <a class="item item-icon-left"  ng-href="#/app/report" ng-click="closePopover(); saveForReport(units, companyName, title)">
               <i class="icon ion-android-document"></i>
               Genrate Report
           </a>

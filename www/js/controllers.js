@@ -38,25 +38,33 @@ function($scope, $location, $ionicPlatform, $ionicModal, $cordovaBarcodeScanner,
     *@description scan the qr code of the unit
     */
     $scope.scanUnit = function(name, company_id){
+        try {
+            // Ask for confirmation using native dialog
+            $ionicPlatform.ready(function(){
+                navigator.notification.confirm("Position your camera now.", function(buttonIndex){
+                    switch(buttonIndex){
+                        case 1 :
+                                startScanner();
+                                break;
+                            case 2 :
+                                // do nothing
+                                break;
+                        }   
+                }, "Start Scanner", ["Yes", "No"]);
+            });
 
-        // Ask for confirmation using ionic popup
-        /* 
-        var scanConfirm = $ionicPopup.confirm({
-            title: 'Scan Qr code.',
-            template: 'Please position your camera now.'
-        });
-        scanConfirm.then(function(res){
-            if(res){
+            // Start the scanner
+            function startScanner(){
                 // Scan the barcode
-                 $cordovaBarcodeScanner.scan().then(function(imageData) {
+                $cordovaBarcodeScanner.scan().then(function(imageData) {
                     if(!imageData.cancelled){
                         // TODO : add QR code data filtering
                         $location.path('app/unitRecords/' + imageData.text + '/' + name + '/' + company_id);
                     }else {
-                       var alertPopup = $ionicPopup.alert({
-                        title : 'Scann cancelled'
-                    });
-                    alertPopup;
+                        var alertPopup = $ionicPopup.alert({
+                            title : 'Scann cancelled'
+                        });
+                        alertPopup;
                     }
                 }, function(error) {
                     var alertPopup = $ionicPopup.alert({
@@ -64,40 +72,8 @@ function($scope, $location, $ionicPlatform, $ionicModal, $cordovaBarcodeScanner,
                         template : 'An error occured ->' + error
                     });
                     alertPopup;
-                 });
+                });
             }
-        });
-        */
-        try {
-        // Ask for confirmation using native dialog
-        $ionicPlatform.ready(function(){
-            navigator.notification.confirm("Position your camera now.", function(buttonIndex){
-                switch(buttonIndex){
-                    case 1 :
-                            // Scan the barcode
-                            $cordovaBarcodeScanner.scan().then(function(imageData) {
-                                if(!imageData.cancelled){
-                                    // TODO : add QR code data filtering
-                                    $location.path('app/unitRecords/' + imageData.text + '/' + name + '/' + company_id);
-                                }else {
-                                   var alertPopup = $ionicPopup.alert({
-                                    title : 'Scann cancelled'
-                                });
-                                alertPopup;
-                                }
-                            }, function(error) {
-                                var alertPopup = $ionicPopup.alert({
-                                    title : 'Scanner Error',
-                                    template : 'An error occured ->' + error
-                                });
-                                alertPopup;
-                             });
-                            break;
-                        case 2 :
-                            break;
-                    }   
-            }, "Start Scanner", ["Yes", "No"]);
-        });
         }
         catch(e){
             alert(e);
@@ -109,7 +85,7 @@ function($scope, $location, $ionicPlatform, $ionicModal, $cordovaBarcodeScanner,
     *@description save data for generating report
     */
     $scope.saveForReport = function(data, companyName, docTitle){
-
+        console.log(data);
         // Save data to localStorage
         localStorage.setItem("report", angular.toJson(data));
         localStorage.setItem("company", companyName);
@@ -210,7 +186,20 @@ function($scope, $location, $ionicPlatform, $ionicModal, $cordovaBarcodeScanner,
 *@controller CompanyCtrl
 */
 .controller('CompanyCtrl',
-function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionicPopup, $filter, $cordovaBarcodeScanner, CompanySvc, UnitSvc){
+function(
+    $scope, 
+    $q, 
+    $stateParams, 
+    $ionicPopover, 
+    $ionicModal, 
+    $location, 
+    $ionicPopup, 
+    $filter, 
+    $cordovaBarcodeScanner, 
+    FileSvc,
+    CompanySvc, 
+    UnitSvc
+){
      /** 
     *@process 
     *@description Create a pop-over 
@@ -347,28 +336,35 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     
     /**
     *@function deleteAllRecords
-    *@param id {{ int }} item id
+    *@param name {{ str }} company name
     */
-    $scope.deleteAllRecords = function(id){
-        // Show confirmation box
-        var confirmation = $ionicPopup.confirm({
-            title : 'Delete All Data',
-            template : 'You will lost all data permanently. Do you want to proceed?'
-        });
-        
-        confirmation.then(function(res){
-            if(res){
-                // delete all the records
-                CompanySvc.delete(id).then(function(res){
-                    // Delete also the stored units data
-                    UnitSvc.query('DELETE FROM units WHERE company_id = ?', [id]);
-                    // data has been deleted redirect user
-                    $location.path('/app/records');
-                });
-            } else {
-                // Do nothing
-            }
-        });
+    $scope.deleteAllRecords = function(name, id){
+        try{
+            // Show confirmation box
+            var confirmation = $ionicPopup.confirm({
+                title : 'Delete All Data',
+                template : 'You will lost all data permanently. Do you want to proceed?'
+            });
+            
+            confirmation.then(function(res){
+                if(res){
+                    // delete all the records
+                    CompanySvc.delete(id).then(function(res){
+                        // Remove data directory
+                        var dirName = $stateParams.name.split(' ').join('');
+                        FileSvc.removeDirExternal(dirName);
+                        // Delete also the stored units data
+                        UnitSvc.query('DELETE FROM units WHERE company_name = ?', [name]);
+                        // data has been deleted redirect user
+                        $location.path('/app/records');
+                    });
+                } else {
+                    // Do nothing
+                }
+            });
+        } catch(e){
+            alert("deleteAllRecords " + e);
+        }
     }
     
     /**
@@ -377,8 +373,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getNotInspected = function(){
         var deffered = $q.defer();
-        var notInspected = "SELECT * FROM units WHERE company_id = ?";
-        UnitSvc.query(notInspected, [$stateParams.id]).then(function(res){
+        var notInspected = "SELECT * FROM units WHERE company_name = ?";
+        UnitSvc.query(notInspected, [$stateParams.name]).then(function(res){
 
             var units = []; // holds the not inspected units
 
@@ -431,9 +427,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getGoodUnits = function(){
         var deffered = $q.defer();
-        var goodUnits = "SELECT * FROM units WHERE company_id = ? AND status = 'operational' AND expired = 'no'";
+        var goodUnits = "SELECT * FROM units WHERE company_name = ? AND status = 'operational' AND expired = 'no'";
 
-        UnitSvc.query(goodUnits, [$stateParams.id]).then(function(res){
+        UnitSvc.query(goodUnits, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -468,9 +464,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getDeffectiveUnits = function(){
         var deffered = $q.defer();
-        var deffectiveUnits = "SELECT * FRoM units WHERE company_id = ? AND status = 'deffective'";
+        var deffectiveUnits = "SELECT * FRoM units WHERE company_name = ? AND status = 'deffective'";
 
-        UnitSvc.query(deffectiveUnits, [$stateParams.id]).then(function(res){
+        UnitSvc.query(deffectiveUnits, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -503,9 +499,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getMissingUnits = function(){
         var deffered = $q.defer();
-        var missing = "SELECT * FROM units WHERE company_id = ? AND missing = 'yes'";
+        var missing = "SELECT * FROM units WHERE company_name = ? AND missing = 'yes'";
 
-        UnitSvc.query(missing, [$stateParams.id]).then(function(res){
+        UnitSvc.query(missing, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -538,9 +534,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getChecklist1Failed = function(){
         var deffered = $q.defer();
-        var checklist1 = "SELECT * FROM units WHERE company_id = ? AND checklist1 = 'failed'";
+        var checklist1 = "SELECT * FROM units WHERE company_name = ? AND checklist1 = 'failed'";
 
-        UnitSvc.query(checklist1, [$stateParams.id]).then(function(res){
+        UnitSvc.query(checklist1, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -573,9 +569,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getChecklist2Failed = function(){
         var deffered = $q.defer();
-        var checklist2 = "SELECT * FROM units WHERE company_id = ? AND checklist2 = 'failed'";
+        var checklist2 = "SELECT * FROM units WHERE company_name = ? AND checklist2 = 'failed'";
 
-        UnitSvc.query(checklist2, [$stateParams.id]).then(function(res){
+        UnitSvc.query(checklist2, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -608,9 +604,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getChecklist3Failed = function(){
         var deffered = $q.defer();
-        var checklist3 = "SELECT * FROM units WHERE company_id = ? AND checklist3 = 'failed'";
+        var checklist3 = "SELECT * FROM units WHERE company_name = ? AND checklist3 = 'failed'";
 
-        UnitSvc.query(checklist3, [$stateParams.id]).then(function(res){
+        UnitSvc.query(checklist3, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -643,9 +639,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getChecklist4Failed = function(){
         var deffered = $q.defer();
-        var checklist4 = "SELECT * FROM units WHERE company_id = ? AND checklist4 = 'failed'";
+        var checklist4 = "SELECT * FROM units WHERE company_name = ? AND checklist4 = 'failed'";
 
-        UnitSvc.query(checklist4, [$stateParams.id]).then(function(res){
+        UnitSvc.query(checklist4, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -678,9 +674,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getChecklist5Failed = function(){
         var deffered = $q.defer();
-        var checklist5 = "SELECT * FROM units WHERE company_id = ? AND checklist5 = 'failed'";
+        var checklist5 = "SELECT * FROM units WHERE company_name = ? AND checklist5 = 'failed'";
 
-        UnitSvc.query(checklist5, [$stateParams.id]).then(function(res){
+        UnitSvc.query(checklist5, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -713,9 +709,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getChecklist6Failed = function(){
         var deffered = $q.defer();
-        var checklist6 = "SELECT * FROM units WHERE company_id = ? AND checklist6 = 'failed'";
+        var checklist6 = "SELECT * FROM units WHERE company_name = ? AND checklist6 = 'failed'";
 
-        UnitSvc.query(checklist6, [$stateParams.id]).then(function(res){
+        UnitSvc.query(checklist6, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -748,9 +744,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.getChecklist8Failed = function(){
         var deffered = $q.defer();
-        var checklist8 = "SELECT * FROM units WHERE company_id = ? AND checklist8 = 'failed'";
+        var checklist8 = "SELECT * FROM units WHERE company_name = ? AND checklist8 = 'failed'";
 
-        UnitSvc.query(checklist8, [$stateParams.id]).then(function(res){
+        UnitSvc.query(checklist8, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -803,9 +799,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         var tmpDate = tmpYear + '/' + tmpMonth + '/' + date;
         var actualDate = year + '/' + month + '/' + date;
 
-        var nearExpire = "SELECT * FROM units WHERE company_id = ?";
+        var nearExpire = "SELECT * FROM units WHERE company_name = ?";
 
-        UnitSvc.query(nearExpire, [$stateParams.id]).then(function(res){
+        UnitSvc.query(nearExpire, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             var testDate = Number(tmpDate.split('/').join('')); 
             var actDate = Number(actualDate.split('/').join(''));
@@ -859,9 +855,9 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 
         var actualDate = year + '/' + month + date;
 
-        var query = "SELECT * FROM units WHERE company_id = ?";
+        var query = "SELECT * FROM units WHERE company_name = ?";
         // Get the unit data
-        UnitSvc.query(query, [$stateParams.id]).then(function(res){
+        UnitSvc.query(query, [$stateParams.name]).then(function(res){
             var actual = Number(actualDate.split('/').join(''));
             var data = $filter('sqlResultSanitize')(res);
             var query = "UPDATE units SET expired = ? WHERE serial_no = ?";
@@ -887,8 +883,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $scope.getExpired = function(){
         var deffered = $q.defer();
 
-        var query = "SELECT * FROM units WHERE expired = 'yes' AND company_id = ?";
-        UnitSvc.query(query, [$stateParams.id]).then(function(res){
+        var query = "SELECT * FROM units WHERE expired = 'yes' AND company_name = ?";
+        UnitSvc.query(query, [$stateParams.name]).then(function(res){
             var data = $filter('sqlResultSanitize')(res);
             deffered.resolve(data);
         });
@@ -929,8 +925,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
         });
 
         // Get the total fire extinguiser units of the company
-        var total = "SELECT serial_no FROM units WHERE company_id = ?";
-        UnitSvc.query(total, [$stateParams.id]).then(function(res){
+        var total = "SELECT serial_no FROM units WHERE company_name = ?";
+        UnitSvc.query(total, [$stateParams.name]).then(function(res){
             $scope.summary.totalUnits = res.rows.length;
 
         });
@@ -1090,49 +1086,15 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 *@description locations Ctrl
 */
 .controller('LocationsCtrl', function($scope, $stateParams, $ionicPopover, UnitSvc){
-    /** 
-    *@process 
-    *@description Create a pop-over 
-    */
-    $ionicPopover.fromTemplateUrl('menu-popover.html', {
-        scope: $scope
-    }).then(function(popover){
-        $scope.popover = popover;
-    });
-    
-    /**
-    *@function openPopover
-    *@description show the popover
-    */
-    $scope.openPopover = function($event){
-        $scope.popover.show($event);
-    };
-    
-    /**
-    *@function openPopover
-    *@description hide the popover
-    */
-    $scope.closePopover = function(){
-        $scope.popover.hide();
-    };
-    
-    /**
-    *@process
-    *@description cleanup the popover when whe're done with it
-    */
-    $scope.$on('$destroy', function(){
-        $scope.popover.remove();
-    });
-
     /**
     *@function viewRecords
     *@description view company units records
     */
-    $scope.viewRecords = function(id){
+    $scope.viewRecords = function(companyName){
         // Get all the company units
-        var query = "SELECT * FROM units WHERE company_id = ?";
+        var query = "SELECT * FROM units WHERE company_name = ?";
 
-        UnitSvc.query(query, [id]).then(function(res){
+        UnitSvc.query(query, [companyName]).then(function(res){
             // Generate a list of the units locations
             var unitLocations = [];
             for(var i = 0; i < res.rows.length; i++){
@@ -1145,7 +1107,6 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
             $scope.locations = unitLocations;
             $scope.locationsPage = true;
             $scope.printRecords = true;
-            $scope.companyId = id;
         });
     }
 
@@ -1155,7 +1116,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.$on('$ionicView.enter', function(e){
         $scope.companyName = $stateParams.name;
-        $scope.viewRecords($stateParams.id);
+        $scope.viewRecords($stateParams.name);
     });
 
 })
@@ -1171,6 +1132,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $ionicPopover, 
     $ionicPopup,
     $location,
+    $filter,
     UnitSvc
 ){
     /** 
@@ -1211,33 +1173,19 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@function locationRecords
     *@description show the list of units in the location
     */
-    $scope.locationRecords = function(company_id, location){
+    $scope.locationRecords = function(company_name, location){
         // get the units data
         var param = [];
-        param[0] = company_id;
+        param[0] = company_name;
         param[1] = location;
 
-        var query = "SELECT * FROM units WHERE company_id = ? AND location = ?";
+        var query = "SELECT * FROM units WHERE company_name = ? AND location = ?";
 
         UnitSvc.query(query, param).then(function(res){
-            var newData = [];
-            // Sanitize the data
-            for(var i = 0; i < res.rows.length; i++){
-                var tmpData = {};
-
-                tmpData.id = res.rows.item(i).id;
-                tmpData.serial_no = res.rows.item(i).serial_no;
-                tmpData.company_id = res.rows.item(i).company_id;
-                tmpData.model = res.rows.item(i).model;
-                tmpData.status = res.rows.item(i).status;
-                tmpData.picture_path = res.rows.item(i).picture_path;
-
-                newData.push(tmpData);
-            }  
+            var newData = $filter('sqlResultSanitize')(res);
 
             $scope.units = newData; 
             $scope.title = location;
-            $scope.companyId = company_id;
             $scope.companyName = $stateParams.name;
         });
     }
@@ -1247,7 +1195,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description delete all the records in the list
     */
     $scope.deleteAll = function(location){
-        var query = "DELETE FROM units WHERE location = ? AND company_id = ?";
+        var query = "DELETE FROM units WHERE location = ? AND company_name = ?";
 
         // ask for confirmation to the user
         var confirmation = $ionicPopup.confirm({
@@ -1255,7 +1203,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
             template : 'You will lost all the data permanently. Do you want to proceed?'
         }).then(function(res){
             if(res){
-                 UnitSvc.query(query, [$stateParams.location, $stateParams.id]).then(function(res){
+                 UnitSvc.query(query, [$stateParams.location, $stateParams.name]).then(function(res){
                     var alertPopup = $ionicPopup.alert({
                         title : 'Data has been deleted.'
                     });
@@ -1272,7 +1220,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@description This process will run every time when this page is loaded
     */
     $scope.$on('$ionicView.enter', function(e){
-        $scope.locationRecords($stateParams.id, $stateParams.location);
+        $scope.locationRecords($stateParams.name, $stateParams.location);
     });
 
 })
@@ -1472,7 +1420,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $scope.updateDetails = function(unitObj){
         // Update the units details
         var params = [];
-        params[0] = (unitObj.company_id.id == undefined) ? $stateParams.companyId : unitObj.company_id.id;
+        params[0] = (unitObj.company_name == undefined) ? $stateParams.name : unitObj.company_name;
         params[1] = unitObj.model;
         params[2] = unitObj.location;
         params[3] = $filter('date')(unitObj.dop, 'yyyy/MM/dd');
@@ -1497,7 +1445,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 
         params[7] = unitObj.serial_no;
         
-        var query = "UPDATE units SET company_id = ?, model = ?, location = ?, dop = ?, date_refilled = ?, expiration_date = ?, expired = ? WHERE serial_no = ?";
+        var query = "UPDATE units SET company_name = ?, model = ?, location = ?, dop = ?, date_refilled = ?, expiration_date = ?, expired = ? WHERE serial_no = ?";
         UnitSvc.query(query, params).then(function(res){
             // notify the user
             var alertPopup = $ionicPopup.alert({
@@ -1578,8 +1526,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     */
     $scope.addForm = function(serial){
         $scope.add = {};
-        $scope.add.serialNo = serial;
-        $scope.add.companyId = $stateParams.companyId;
+        $scope.add.serial_no = serial;
+        $scope.add.company_name = $stateParams.name;
 
         $scope.openModal(1); // open the modal box
     }
@@ -1612,10 +1560,6 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 
         UnitSvc.read(serial).then(function(res){
             if(res != false){
-                // Get the company name
-                CompanySvc.read(res.company_id).then(function(res){
-                    $scope.companyName = res.name;
-                });
                 // pass the data into the view
                 $scope.unit = res;
                 $scope.noResults = false;
@@ -1888,7 +1832,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
 
 
 /**
-*@controller ImportRecordsCtrl
+*@controllerrtRecordsCtrl
 *@description import ms excel records
 */
 .controller('ImportRecordsCtrl', function(
@@ -1906,7 +1850,7 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     *@function uploadFile
     *@descrtiption get the file from the form
     */
-    $scope.uploadFile = function(id){
+    $scope.uploadFile = function(){
         $scope.uploaded = false;
             // get the excel file
             FileSvc.read().then(function(res){
@@ -1930,9 +1874,8 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $scope.saveToDB = function(data){
         var e = [];
         for(var i = 0; i < data.length; i++){
-            // set the units company id to the current company
-            data[i].companyId = $stateParams.companyId;
-
+            // if the company_name is not defined set the units company id to the current company
+            data[i].company_name = (data[i].company_name == undefined) ? $stateParams.companyName : data[i].company_name;
             UnitSvc.fromFile(data[i]);
         }
         
@@ -2231,4 +2174,129 @@ function($scope, $q, $stateParams, $ionicPopover, $ionicModal, $location, $ionic
     $scope.upFolder = function(){
         $scope.fileList = false;
     }
+})
+
+/**
+*@controller SyncCtrl
+*@description sync date controller
+*/
+.controller('SyncCtrl', function(
+    $scope, 
+    $ionicPlatform,
+    $ionicPopup,
+    $ionicLoading,
+    UnitSvc,
+    CompanySvc,
+    ExcelSvc,
+    FileSvc
+){
+    $ionicPlatform.ready(function(){
+        /**
+        *@function activate
+        *@description ReportSvc Event Listeners: Progress/Done
+        *used to listen for async progress updates so loading text can change in 
+        *UI to be repsonsive because the report process can be 'lengthy' on 
+        *older devices (chk reportSvc for emitting events)
+        */
+        function __activate(){
+            $scope.$on('ExcelSvc::Progress', function(evt, msg){
+                __showLoading(msg);
+            });
+            $scope.$on('ExcelSvc::Done', function(evt, msg){
+                __hideLoading();
+            });
+        }
+
+        /**
+        *@function __showLoading
+        *@description helper function that shows the loading status in the UI
+        */
+        function __showLoading(msg){
+            $ionicLoading.show({
+                template : msg +  '<br /><ion-spinner icon="lines"></ion-spinner>'
+            });
+        }
+
+        /**
+        *@function __hideLoading
+        *@description helper function that hide the loading status in the UI
+        */
+        function __hideLoading(){
+            $ionicLoading.hide();
+        }
+
+        /**
+        *@function genSyncData
+        *@description generate excel file for all the data in the database
+        */
+        $scope.genSyncData = function(){
+            // get all the data in the units table
+            UnitSvc.all().then(function(res){
+                console.log(res);
+                ExcelSvc.genForSycnUnits(res).then(function(success){
+                    // get all company data
+                    CompanySvc.all().then(function(res){
+                        console.log(res);
+                        ExcelSvc.genForSycnCompanies(res).then(function(success){
+                            // notify the user
+                            var alertPopup = $ionicPopup.alert({
+                                title : 'Sync Data generated'
+                            });
+                        });
+                    });
+                });
+            });
+        }
+
+        /**
+        *@function uploadFile
+        *@descrtiption get the file from the form
+        */
+        $scope.uploadSyncData = function(id){
+            $scope.uploaded = false;
+            // get the excel file
+            FileSvc.read().then(function(res){
+                $scope.showLoading();
+
+                // parse the excel file
+                ExcelSvc.parse(res).then(function(data){
+                    // save to db
+                    syncData(data);
+                    $scope.uploaded = true;
+                    // hide the notification image after 3 seconds
+                    $timeout(function(){
+                        $scope.uploaded = false;
+                    }, 300);
+                });
+
+                $scope.hideLoading();
+            });
+
+            // save to database
+            function syncData(data){
+                for(var i = 0; i < data.length; i++ ){
+                    // check if the record is present in the database
+                    UnitSvc.read(data[i].serial_no).then(function(res){
+                        // the data is not present create a new one
+                        if(res == 0){
+                            UnitSvc.fromFile(data[i]);
+                        }
+                        // the data already exists  Update the data
+                        else {
+                            UnitSvc.update(data[i]);
+                        }
+                    });
+                }
+                $scope.dataSync = true;
+            }
+        }
+            
+        /**
+        *@process 
+        *@description This process will run every when this page is loaded
+        */
+        $scope.$on('$ionicView.enter', function(e){
+             __activate();
+        });
+    });
 });

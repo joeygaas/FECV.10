@@ -31,8 +31,8 @@
    - Records
       - Import records (done)
          - import button minor bug(done)
-      - Unit list -delete records(ongoing)
-      - Location list -delete records(ongoing)
+      - Unit list -delete records(done)
+      - Location list -delete records(done)
       - Search(done)
       - Generate Report
          - Generate pdf file(done)
@@ -41,6 +41,9 @@
          - Open excel file(done)
          - FileBrowser(done)
       - Unit expiration date monitoring(done)
+
+   - Sycn Data
+      - Setup server(ongoing)
 
       
          
