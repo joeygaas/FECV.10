@@ -2253,42 +2253,33 @@ function(
         *@descrtiption get the file from the form
         */
         $scope.uploadSyncData = function(id){
-            $scope.uploaded = false;
-            // get the excel file
-            FileSvc.read().then(function(res){
-                $scope.showLoading();
+           // Open file 1
+           FileSvc.read().then(function(data1){
+                var data1 = data1;
 
-                // parse the excel file
-                ExcelSvc.parse(res).then(function(data){
-                    // save to db
-                    syncData(data);
-                    $scope.uploaded = true;
-                    // hide the notification image after 3 seconds
-                    $timeout(function(){
-                        $scope.uploaded = false;
-                    }, 300);
-                });
+                // Open file 2
+                FileSvc.read().then(function(data2){
+                    var data2 = data2;
+                    // parse data1
+                    ExcelSvc.parse(data1).then(function(res){
 
-                $scope.hideLoading();
-            });
-
-            // save to database
-            function syncData(data){
-                for(var i = 0; i < data.length; i++ ){
-                    // check if the record is present in the database
-                    UnitSvc.read(data[i].serial_no).then(function(res){
-                        // the data is not present create a new one
-                        if(res == 0){
-                            UnitSvc.fromFile(data[i]);
-                        }
-                        // the data already exists  Update the data
-                        else {
-                            UnitSvc.update(data[i]);
-                        }
                     });
-                }
-                $scope.dataSync = true;
-            }
+                    // parse data2
+                    ExcelSvc.parse(data2).then(function(res){
+
+                    });
+                });
+           }, function(error){
+
+           });
+            
+           // Sync data functions
+           function syncUnits(data){
+
+           }
+           function syncCopany(data){
+
+           }
         }
             
         /**
