@@ -2256,60 +2256,58 @@ function(
         $scope.uploadSyncData = function(id){
            // Open file1
            FileSvc.read().then(function(data1){
-                var data1 = data1;
-
-                // open file2
-                FileSvc.read().then(function(data2){
-                    var data2 = data2;
-                    // parse data1
-                    ExcelSvc.parse(data1).then(function(res){
-                        syncData(res);
-                    });
-                    // parse data2
-                    ExcelSvc.parse(data2).then(function(res){
-                        syncData(res);
-                    });
+                ExcelSvc.parse(data1).then(function(res){
+                    syncData(res);
                 });
            }, function(error){
-
+                alert("uploadSyncData " + error);
            });
             
            // Sync data functions
            function syncData(data){
-                var compSelectQuery = "SELECT * FROM companies WHERE name = ?";
-                var compUpdateQuery = "UPDATE companies SET name = ?, person = ?, contact_no = ?";
+                try{
+                    // SQL queries
+                    var compSelectQuery = "SELECT * FROM companies WHERE name = ?";
+                    var compUpdateQuery = "UPDATE companies SET person = ?, contact_no = ? WHERE name = ? ";
 
-                for(var i = 0; i < data.length; i++){
-                    // if the name attribute is pressent this is the companies backup records
-                    if(data[i].name != undefined){
-                        CompanySvc.query(compSelectQuery, [data[i].name]).then(function(res){
-                            var data = $filter('sqlResultSanitize')(res);
-                            if(data.length < 0){
-                                // Create a new company
-                                CompanySvc.create([data[i].name, data[i].person, data[i].number]);
-                            }
-                            else {
-                                // Update the existing data
-                                CompanySvc.query(compUpdateQuery, [data[i].name, data[i].person, data[i].name]);
-                            }
-                        });
-                    }
-                    // if the serial_no attribute is pressent this is the unit backup records
-                    else if(data[i].company_name != undefined){
-                        UnitSvc.read(data[i].serial_no).then(function(res){
-                            var data = res;
-                            if(data.length < 0){
-                                // Create a new unit
-                                UnitSvc.create(data);
-                            }
-                            else {
-                                // Update the existing data
-                                UnitSvc.update(data);
-                            }
-                        });
-                    }
-                } // end of for loop
+                    for(var i = 0; i < data.length; i++){
+                        var tmpData = data[i];
+                        // if the name attribute is pressent this is the companies backup records
+                        if(tmpData.name != undefined){ 
+                            CompanySvc.query(compSelectQuery, [tmpData.name]).then(function(res){
+                                var length = res.rows.length;
+                                if(length == 0){
+                                    var companyName = tmpData.name.split(' ').join('');
 
+                                    CompanySvc.create(tmpData.name, tmpData.person, tmpData.number);
+                                    FileSvc.createDirInExternal(companyName);
+                                }
+                                else {
+                                    CompanySvc.query(compUpdateQuery, [tmpData.person, tmpData.number, tmpData.name]);
+                                }
+                            });
+                        }
+                        // if the serial_no attribute is pressent this is the unit backup records
+                        else if(tmpData.company_name != undefined){
+                            UnitSvc.read(tmpData.serial_no).then(function(res){
+                                var length = res.rows.length;
+                                if(length <= 0){
+                                    // Create a new unit
+                                    UnitSvc.create(tmpData);
+                                }
+                                else {
+                                    // Update the existing data
+                                    UnitSvc.update(tmpData);
+                                }
+                            });
+                        }
+                    } // end of for loop
+                    
+                    alert("Done Sir!!!");
+
+                } catch(e){
+                    alert("syncData " + e);
+                }
            }
         }
             

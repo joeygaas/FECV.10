@@ -19,6 +19,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
                     deffered.resolve(newData);
                 }, function(error){
                     alert("Error message: " + error.message);
+                    deffered.reject(error);
                 });
             });
             return deffered.promise;
@@ -27,15 +28,18 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
         // Create
         create : function(name, person, number){
             var deffered = $q.defer();
-            
-            $ionicPlatform.ready(function(){
-                var query = "INSERT INTO companies(name, person, contact_no) VALUES(?, ?, ?)";
-                $cordovaSQLite.execute(db, query, [name, person, number]).then(function(res){
-                    deffered.resolve(res.insertId);
-                }, function(error){
-                    alert("Error message: " + error.message);
-                }); 
-            });
+            try{
+                $ionicPlatform.ready(function(){
+                    var query = "INSERT INTO companies(name, person, contact_no) VALUES(?, ?, ?)";
+                    $cordovaSQLite.execute(db, query, [name, person, number]).then(function(res){
+                        deffered.resolve(res.insertId);
+                    }, function(error){
+                        alert("Error message: " + error.message);
+                    }); 
+                });
+            } catch(e){
+                alert("CompanySvc create " + e);
+            }
             return deffered.promise;
         },
         
