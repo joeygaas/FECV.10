@@ -261,7 +261,7 @@ angular.module('fireExMonitor.services', ['ionic', 'ngCordova', 'fireExMonitor.f
         },
 
         // Update the units records
-        update : function(data){
+        update : function(unitObj){
             var deffered = $q.defer();
 
             try{

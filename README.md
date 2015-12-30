@@ -43,7 +43,9 @@
       - Unit expiration date monitoring(done)
 
    - Sycn Data
-      - Setup server(ongoing)
+      - Generate sync data (done)
+      - Upload sync data (ongoing)
+         - upload data bug
 
       
          
